@@ -46,8 +46,33 @@ int main(int argc, char const *argv[])
 }
 
 void solve(char *file){
-    char command[BUFF_SIZE];   
-    sprintf(command, "minisat %s | grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\" | tr \"\\n\" \"\t\" | tr -d \" \t\"", file);
-    system(command);
-    printf("\n");
+    char result[BUFF_SIZE]; 
+    char minisat_output[4096];
+    
+    int check = sprintf(result, "minisat %s | grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"", file);
+    if(check == -1) {
+        printf("Error");
+    }
+    
+    FILE* result_stream = popen(result, "r");
+    if (result_stream == NULL) {
+        printf("Error");
+    }
+    
+    int count = fread(minisat_output, sizeof(char), 4096, result_stream);
+
+    minisat_output[count] = 0;
+
+    if (ferror(result_stream)){
+        printf("Error");
+    }
+
+    //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
+    //nos comunicados por FD 1 con el master
+    printf("%s %s %d", minisat_output, file, getpid());
+
+    if(pclose(result_stream) == -1) {
+        printf("Error");
+    }
+
 }

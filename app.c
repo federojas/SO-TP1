@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
     }
     //parent
     else {
-        check =  write(parent_to_child[1], "HOLA", 4);
+        check =  write(parent_to_child[1], "HOLA", sizeof("hola"));
         if(check == -1)
             printf("Error");
         char buff[4];
