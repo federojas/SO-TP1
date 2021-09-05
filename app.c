@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
 int main(int argc, char const *argv[])
 {
     // if(argc < 2) {
@@ -31,10 +30,9 @@ int main(int argc, char const *argv[])
     }
     //parent
     else {
-        check =  write(parent_to_child[1], "HOLA", 4); 
+        check =  write(parent_to_child[1], "HOLA", 4);
         if(check == -1)
             printf("Error");
-    
         char buff[4];
         check = read(child_to_parent[0], buff, 4);
         if(check == -1)
