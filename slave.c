@@ -9,6 +9,7 @@ int main(int argc, char const *argv[])
 {
     //desactivamos buffer
     int check = setvbuf(stdout, NULL, _IONBF, 0);
+
     if(check != 0) {
         //ERROR HANDLER 
         printf("Error\n");
@@ -47,9 +48,7 @@ void solve(char *file){
     //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
     //nos comunicados por FD 1 con el master
     printf("%s %s %d", minisat_output, file, getpid());
-
     if(pclose(result_stream) == -1) {
         printf("Error");
     }
-
 }
