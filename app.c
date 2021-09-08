@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include "error_handling.h"
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
