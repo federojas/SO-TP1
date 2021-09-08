@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;
         if (select(max_fd + 1, &read_set, NULL, NULL, &timeout) == -1 ) {
-            printf("error");
+            error_handler("select: ");
         }
 
         for(int i = 0; i < childs_count; i++) {
@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
                 char read_output[MAX_READ_OUTPUT_SIZE];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
-                    printf("error");
+                    error_handler("read: ")
                 } else if(read_return == 0) {
                     pipes[i].open = 0;
                     close(pipes[i].child_to_parent[0]);
@@ -149,7 +149,7 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
             if(close(pipes[i].child_to_parent[1]) == -1)
                error_handler("Closing FD: ");
             if(close(pipes[i].parent_to_child[0]) == -1)
-                error_handler("Closing FD: ");
+               error_handler("Closing FD: ");
         }
     }
 
