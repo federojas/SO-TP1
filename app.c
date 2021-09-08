@@ -4,8 +4,7 @@
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
-
-#define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count)> pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
+#define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) > pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
 
 typedef struct {
     int child_to_parent[2];
@@ -13,11 +12,11 @@ typedef struct {
     pid_t pid;
 } t_child;
 
-void initialize_pipes(t_child pipes[], int childs_count);
+void initialize_pipes(t_child pipes[], size_t childs_count);
 void close_pipes(t_child child);
-void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int pending_tasks);
+void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t pending_tasks, size_t * task_idx);
 
-
+const char* slave_file_name = "./slave"; //insert slave file name
 
 int main(int argc, char const *argv[])
 {
@@ -36,6 +35,7 @@ int main(int argc, char const *argv[])
     
     size_t total_tasks = argc - 1;
     size_t completed_tasks, pending_tasks;
+    size_t task_idx = 0;
     char const **tasks = argv + 1;
     pending_tasks = total_tasks;
 
@@ -83,22 +83,26 @@ void close_pipes(t_child child){
         printf("error");
 }
 
-void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int pending_tasks) {
+void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t pending_tasks, size_t * task_idx) {
     
-    int tasks_per_child = TASKS_PER_CHILD(childs_count,pending_tasks);
+    int tasks_per_child = TASKS_PER_CHILD(childs_count, pending_tasks);
     for(int i = 0; i < childs_count; i++) {
-        if((pipes[i].pid = fork()) == -1){
+        char * child_tasks[tasks_per_child + 1];
+        child_tasks[tasks_per_child] = NULL;
+        if ((pipes[i].pid = fork()) == -1) {
             printf("error");
         }
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], 1)  == -1)
-               printf("error");
+                printf("error");
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
                 printf("error");
             close_pipes(pipes[i]);
-            execv("./slave", tasks);
-            printf("error"); //si llego hasta aca el programa es porque retorno el execv -> error
+            for(int j = 0; j < tasks_per_child; j++)
+                child_tasks[j] = tasks[(*task_idx)++];
+            execv(slave_file_name, child_tasks);
+            printf("fallo"); //si llego hasta aca el programa es porque retorno el execv -> error
         } 
         //parent
         else {
