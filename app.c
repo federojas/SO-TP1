@@ -46,13 +46,17 @@ int main(int argc, char const *argv[])
 
     t_child pipes[childs_count];
 
-    initialize_pipes(pipes, childs_count);
+    size_t max_fd = -1;
+    initialize_pipes(pipes, childs_count, &max_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, pending_tasks);
+    
+
+
 
     return 0;
 }
 
-void initialize_pipes(t_child pipes[], int childs_count) {
+void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                printf("error");
@@ -60,6 +64,10 @@ void initialize_pipes(t_child pipes[], int childs_count) {
             if(pipe(pipes[i].parent_to_child) == -1) {
                 printf("error");
             }
+            if(pipes[i].parent_to_child[1] > *max_fd) {
+                *max_fd = pipes[i].parent_to_child[1];
+            }
+            
     }
     return;
 }
@@ -94,9 +102,6 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
         } 
         //parent
         else {
-            char buff[500];
-            read(pipes[0].child_to_parent[0], buff, 500);
-            printf("%s", buff);
             if(close(pipes[i].child_to_parent[1]) == -1)
                 printf("error");
             if(close(pipes[i].parent_to_child[0]) == -1)
