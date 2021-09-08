@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/select.h>
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
@@ -10,6 +11,7 @@ typedef struct {
     int child_to_parent[2];
     int parent_to_child[2];
     pid_t pid;
+    size_t open = 1;
 } t_child;
 
 void initialize_pipes(t_child pipes[], size_t childs_count);
@@ -34,11 +36,9 @@ int main(int argc, char const *argv[])
     }
     
     size_t total_tasks = argc - 1;
-    size_t completed_tasks, pending_tasks;
     size_t task_idx = 0;
+    size_t solved_tasks = 0;
     char const **tasks = argv + 1;
-    pending_tasks = total_tasks;
-
 
     // Initialize new childs
 
@@ -48,12 +48,28 @@ int main(int argc, char const *argv[])
 
     size_t max_fd = -1;
     initialize_pipes(pipes, childs_count, &max_fd);
-    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, pending_tasks);
+    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks);
     
+    while(solved_tasks < total_tasks) {
+        fd_set read_set;
+        build_read_set(pipes, &read_set, childs_count);
+        if (select(max_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+            printf("error");
+        }
 
+    }
 
 
     return 0;
+}
+
+void build_read_set(t_child pipes[], fd_set * read_Set, size_t childs_count) {
+    FD_ZERO(set); //set reinitialized
+    for (int i = 0; i < childs_count; i++) {
+        if (pipes[i].open == 1) {
+            FD_SET(pipes[i].child_to_parent[0], read_set);
+        }
+    }
 }
 
 void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
@@ -83,9 +99,9 @@ void close_pipes(t_child child){
         printf("error");
 }
 
-void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t pending_tasks, size_t * task_idx) {
+void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx) {
     
-    int tasks_per_child = TASKS_PER_CHILD(childs_count, pending_tasks);
+    int tasks_per_child = TASKS_PER_CHILD(childs_count, total_tasks);
     for(int i = 0; i < childs_count; i++) {
         char * child_tasks[tasks_per_child + 1];
         child_tasks[tasks_per_child] = NULL;
@@ -106,6 +122,7 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
         } 
         //parent
         else {
+            *task_id += tasks_per_child;
             if(close(pipes[i].child_to_parent[1]) == -1)
                 printf("error");
             if(close(pipes[i].parent_to_child[0]) == -1)
