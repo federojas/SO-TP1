@@ -85,7 +85,7 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], 1)  == -1)
-                printf("error");
+               printf("error");
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
                 printf("error");
             close_pipes(pipes[i]);
@@ -94,11 +94,9 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
         } 
         //parent
         else {
-                char buff[500];
-            while(1) {
-                read(pipes[0].child_to_parent[0], buff, 500);
-                printf("%s", buff);
-            }
+            char buff[500];
+            read(pipes[0].child_to_parent[0], buff, 500);
+            printf("%s", buff);
             if(close(pipes[i].child_to_parent[1]) == -1)
                 printf("error");
             if(close(pipes[i].parent_to_child[0]) == -1)

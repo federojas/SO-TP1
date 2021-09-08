@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
         printf("Error\n");
     }
     
-    for (size_t i = 1; i < argc; i++) {
+    for (size_t i = 0; i < argc; i++) {
         solve((char *) argv[i]);
     }
     
