@@ -11,12 +11,14 @@ typedef struct {
     int child_to_parent[2];
     int parent_to_child[2];
     pid_t pid;
-    size_t open = 1;
+    size_t open;
 } t_child;
 
-void initialize_pipes(t_child pipes[], size_t childs_count);
+void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd);
 void close_pipes(t_child child);
-void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t pending_tasks, size_t * task_idx);
+void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx);
+void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count);
+
 
 const char* slave_file_name = "./slave"; //insert slave file name
 
@@ -48,7 +50,7 @@ int main(int argc, char const *argv[])
 
     size_t max_fd = -1;
     initialize_pipes(pipes, childs_count, &max_fd);
-    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks);
+    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &task_idx);
     
     while(solved_tasks < total_tasks) {
         fd_set read_set;
@@ -63,8 +65,8 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void build_read_set(t_child pipes[], fd_set * read_Set, size_t childs_count) {
-    FD_ZERO(set); //set reinitialized
+void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
+    FD_ZERO(read_set); //set reinitialized
     for (int i = 0; i < childs_count; i++) {
         if (pipes[i].open == 1) {
             FD_SET(pipes[i].child_to_parent[0], read_set);
@@ -83,7 +85,7 @@ void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
             if(pipes[i].parent_to_child[1] > *max_fd) {
                 *max_fd = pipes[i].parent_to_child[1];
             }
-            
+            pipes[i].open = 1;
     }
     return;
 }
@@ -122,7 +124,7 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
         } 
         //parent
         else {
-            *task_id += tasks_per_child;
+            *task_idx += tasks_per_child;
             if(close(pipes[i].child_to_parent[1]) == -1)
                 printf("error");
             if(close(pipes[i].parent_to_child[0]) == -1)
