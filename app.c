@@ -78,16 +78,16 @@ void close_pipes(t_child child){
 void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t pending_tasks, size_t * task_idx) {
     
     int tasks_per_child = TASKS_PER_CHILD(childs_count, pending_tasks);
-    char * child_tasks[tasks_per_child + 1];
-    child_tasks[tasks_per_child] = NULL;
     for(int i = 0; i < childs_count; i++) {
+        char * child_tasks[tasks_per_child + 1];
+        child_tasks[tasks_per_child] = NULL;
         if ((pipes[i].pid = fork()) == -1) {
             printf("error");
         }
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], 1)  == -1)
-               printf("error");
+                printf("error");
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
                 printf("error");
             close_pipes(pipes[i]);
