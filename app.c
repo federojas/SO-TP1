@@ -2,10 +2,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/select.h>
+#include <sys/time.h>
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
 #define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) > pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
+#define MAX_READ_OUTPUT_SIZE 4096
+
 
 typedef struct {
     int child_to_parent[2];
@@ -55,12 +58,31 @@ int main(int argc, char const *argv[])
     while(solved_tasks < total_tasks) {
         fd_set read_set;
         build_read_set(pipes, &read_set, childs_count);
-        if (select(max_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+        struct timeval timeout;
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        if (select(max_fd + 1, &read_set, NULL, NULL, &timeout) == -1 ) {
             printf("error");
         }
 
-    }
+        for(int i = 0; i < childs_count; i++) {
+            if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
+                size_t read_return;
+                char read_output[MAX_READ_OUTPUT_SIZE];
+                read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
+                if(read_return == -1) {
+                    printf("error");
+                } else if(read_return == 0) {
+                    pipes[i].open = 0;
+                    close(pipes[i].child_to_parent[0]);
+                } else {
+                    printf("%s", read_output);
+                }
+            }
+        }
 
+    }
+    
 
     return 0;
 }
