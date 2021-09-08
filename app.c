@@ -4,8 +4,7 @@
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
-
-#define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count)> pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
+#define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) > pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
 
 typedef struct {
     int child_to_parent[2];
@@ -17,7 +16,7 @@ void initialize_pipes(t_child pipes[], int childs_count);
 void close_pipes(t_child child);
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int pending_tasks);
 
-
+const char* slave_file_name = "./slave"; //insert slave file name
 
 int main(int argc, char const *argv[])
 {
@@ -78,6 +77,8 @@ void close_pipes(t_child child){
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int pending_tasks) {
     
     int tasks_per_child = TASKS_PER_CHILD(childs_count,pending_tasks);
+    char * child_tasks[tasks_per_child];
+
     for(int i = 0; i < childs_count; i++) {
         if((pipes[i].pid = fork()) == -1){
             printf("error");
@@ -89,7 +90,11 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
                 printf("error");
             close_pipes(pipes[i]);
-            execv("./slave", tasks);
+
+            for(int i = 0; i < tasks_per_child; i++)
+                child_tasks[i] = tasks[i];
+
+            execv(slave_file_name, child_tasks);
             printf("error"); //si llego hasta aca el programa es porque retorno el execv -> error
         } 
         //parent
