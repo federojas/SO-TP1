@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <error_handling.h>
+#include "error_handling.h"
 
 #define BUFF_SIZE 1024
 void solve(char *line);
