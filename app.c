@@ -25,16 +25,13 @@ const char* slave_file_name = "./slave"; //insert slave file name
 int main(int argc, char const *argv[])
 {
     if(argc < 2) {
-        printf("Error: Invalid amount of arguments.\n");
+        fprintf(stderr, "Usage: %s <files>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    // Sets a buffer with size zero, i.e, disables buffering on stdout
-    // _IONBF means No buffer is used. Each I/O operation is written ASAP
     int check = setvbuf(stdout, NULL, _IONBF, 0);
     if (check != 0) {
-        //ERROR HANDLER 
-        printf("Error: setvbuff\n");
+        error_handler("setvbuff");
     }
     
     size_t total_tasks = argc - 1;
@@ -77,10 +74,10 @@ void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
 void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
-               printf("error");
+                error_handler("Pipe: ");
             }
             if(pipe(pipes[i].parent_to_child) == -1) {
-                printf("error");
+                error_handler("Pipe: ");
             }
             if(pipes[i].parent_to_child[1] > *max_fd) {
                 *max_fd = pipes[i].parent_to_child[1];
@@ -92,13 +89,13 @@ void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
 
 void close_pipes(t_child child){
     if(close(child.parent_to_child[0]) == -1)
-        printf("error");
+        error_handler("Closing FD: ");
     if(close(child.parent_to_child[1]) == -1)
-        printf("error");
+        error_handler("Closing FD: ");
     if(close(child.child_to_parent[0]) == -1)
-        printf("error");
+        error_handler("Closing FD: ");
     if(close(child.child_to_parent[1]) == -1)
-        printf("error");
+        error_handler("Closing FD: ");
 }
 
 void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx) {
@@ -108,27 +105,28 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
         char * child_tasks[tasks_per_child + 1];
         child_tasks[tasks_per_child] = NULL;
         if ((pipes[i].pid = fork()) == -1) {
-            printf("error");
+            error_handler("Fork: ");
         }
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], 1)  == -1)
-                printf("error");
+                error_handler("Dup2: ");
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
-                printf("error");
+                error_handler("Dup2: ");
             close_pipes(pipes[i]);
             for(int j = 0; j < tasks_per_child; j++)
                 child_tasks[j] = tasks[(*task_idx)++];
-            execv(slave_file_name, child_tasks);
-            printf("fallo"); //si llego hasta aca el programa es porque retorno el execv -> error
+            if (execv(slave_file_name, child_tasks) == -1) {
+                perror("Execv: ");  
+            }
         } 
         //parent
         else {
             *task_idx += tasks_per_child;
             if(close(pipes[i].child_to_parent[1]) == -1)
-                printf("error");
+               error_handler("Closing FD: ");
             if(close(pipes[i].parent_to_child[0]) == -1)
-                printf("error");
+                error_handler("Closing FD: ");
         }
     }
 
