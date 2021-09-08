@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
                 char read_output[MAX_READ_OUTPUT_SIZE];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
-                    error_handler("read: ")
+                    error_handler("read: ");
                 } else if(read_return == 0) {
                     pipes[i].open = 0;
                     close(pipes[i].child_to_parent[0]);
