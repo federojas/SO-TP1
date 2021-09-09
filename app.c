@@ -64,9 +64,13 @@ int main(int argc, char const *argv[])
         // if (select(max_fd + 1, &read_set, NULL, NULL, &timeout) == -1 ) {
         //     error_handler("select: ");
         // }
-            if(select(FD_SETSIZE,&read_set,NULL,NULL,NULL)<0){
-                error_handler("select: ");
-            }
+        if (select(max_fd + 10, &read_set, NULL, NULL, NULL) == -1 ) {
+            error_handler("select: ");
+        }
+                //printf("llegue");
+            // if(select(FD_SETSIZE,&read_set,NULL,NULL,NULL)<0){
+            //     error_handler("select: ");
+            // }
             // //despues de esta ejecucion reaad_set tiene solo los fd que estan listos para leer   
             // for(int i =0; i<FD_SETSIZE;i++){
             //     if(FD_ISSET(i,&read_set)){
@@ -115,11 +119,15 @@ void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
             if(pipe(pipes[i].parent_to_child) == -1) {
                 error_handler("Pipe: ");
             }
+            printf("VALOR DEL PIPE %d\n",pipes[i].parent_to_child[1] );
             if(pipes[i].parent_to_child[1] > *max_fd) {
+               // printf("%d\n",pipes[i].parent_to_child[1]);
                 *max_fd = pipes[i].parent_to_child[1];
             }
             pipes[i].open = 1;
     }
+    printf("EL VALOR CON EL QUE MAXFD TERMINA ES %ld\n",*max_fd);
+
     return;
 }
 
