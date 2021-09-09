@@ -6,10 +6,10 @@
 #include "error_handling.h"
 #include <string.h>
 
-#define MAX_INIT_CHILDS 5
-#define MIN_initial_tasks_per_child 3
-#define INITIAL_initial_tasks_per_child(childs_count, pending_tasks) (((MIN_initial_tasks_per_child)*childs_count) <= pending_tasks ? MIN_initial_tasks_per_child : 1)
-#define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_INIT_CHILDS > total_tasks ? total_tasks : MAX_INIT_CHILDS)
+#define MAX_CHILDS 5
+#define MAX_INITIAL_TASKS_PER_CHILD 3
+#define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MAX_INITIAL_TASKS_PER_CHILD)*childs_count) <= pending_tasks ? MAX_INITIAL_TASKS_PER_CHILD : 1)
+#define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_CHILDS > total_tasks ? total_tasks : MAX_CHILDS)
 #define MAX_READ_OUTPUT_SIZE 4096
 
 
@@ -56,6 +56,16 @@ int main(int argc, char const *argv[])
     initialize_pipes(pipes, childs_count, &highest_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
     
+
+    //send initial tasks
+    int initial_tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
+
+    for(int i = 0; i < childs_count; i++) {
+        for(int j = 0; j < initial_tasks_per_child; j++) {
+            send_task(pipes[i], (char * const*)tasks, &current_task_idx);
+        }
+    }
+
     fd_set read_set, ready_set;
 
     //read child outputs
@@ -168,30 +178,26 @@ void close_pipes(t_child child){
 
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx) {
     
-    int initial_tasks_per_child = INITIAL_initial_tasks_per_child(childs_count, total_tasks);
-
+    char *const *execv_parameter = NULL;
+    
     for(int i = 0; i < childs_count; i++) {
-        char * child_tasks[initial_tasks_per_child + 1];
-        child_tasks[initial_tasks_per_child] = NULL;
+       
         if ((pipes[i].pid = fork()) == -1) {
             error_handler("Fork: ");
         }
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], 1)  == -1)
-                error_handler("Dup2: ");
+                error_handler("dup2: ");
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
-                error_handler("Dup2: ");
+                error_handler("dup2: ");
             close_pipes(pipes[i]);
-            for(int j = 0; j < initial_tasks_per_child; j++)
-                child_tasks[j] = tasks[(*current_task_idx)++];
-            if (execv(slave_file_name, child_tasks) == -1) {
+            if (execv(slave_file_name, execv_parameter) == -1) {
                 perror("Execv: ");  
             }
         } 
         //parent
         else {
-            *current_task_idx += initial_tasks_per_child;
             //close unused fd
             if(close(pipes[i].child_to_parent[1]) == -1)
                error_handler("Closing ctpw FD: ");

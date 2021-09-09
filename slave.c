@@ -17,16 +17,11 @@ int main(int argc, char const *argv[])
     if(check != 0) {
         perror("setvbuf failed");
     }
-    
-    //initial tasks
-    for (int i = 0; i < argc; i++) {
-        solve((char *) argv[i]);
-    }
 
-    //new tasks
+    //receive tasks
     char read_output[MAX_READ_OUTPUT_SIZE + 1];
     int read_return = 0;
-    
+
     while ((read_return = read(STDIN, read_output, MAX_READ_OUTPUT_SIZE)) != 0) {
 
         if (read_return == -1)
