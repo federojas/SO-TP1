@@ -52,16 +52,33 @@ int main(int argc, char const *argv[])
     initialize_pipes(pipes, childs_count, &max_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &task_idx);
     
+    fd_set read_set, ready_set;
     while(solved_tasks < total_tasks) {
-        fd_set read_set;
+            //select is destructive
+            ready_set=read_set;
         build_read_set(pipes, &read_set, childs_count);
         struct timeval timeout;
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;
-        if (select(max_fd + 1, &read_set, NULL, NULL, &timeout) == -1 ) {
+        // if (select(max_fd + 1, &read_set, NULL, NULL, &timeout) == -1 ) {
+        //     error_handler("select: ");
+        // }
+        if (select(max_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
             error_handler("select: ");
         }
-
+                //printf("llegue");
+            // if(select(FD_SETSIZE,&read_set,NULL,NULL,NULL)<0){
+            //     error_handler("select: ");
+            // }
+            // //despues de esta ejecucion reaad_set tiene solo los fd que estan listos para leer   
+            // for(int i =0; i<FD_SETSIZE;i++){
+            //     if(FD_ISSET(i,&read_set)){
+            //         size_t read_return;
+            //         char read_output[MAX_READ_OUTPUT_SIZE];
+            //         printf("llegue");
+            //         FD_CLR(i, &read_set);
+            //     }
+            // }
         for(int i = 0; i < childs_count; i++) {
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
                 size_t read_return;
@@ -94,7 +111,7 @@ void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
     }
 }
 
-void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
+void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe: ");
@@ -106,6 +123,7 @@ void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
                 *max_fd = pipes[i].child_to_parent[0];
             }
     }
+
     return;
 }
 
