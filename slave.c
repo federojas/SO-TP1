@@ -4,6 +4,10 @@
 #include "error_handling.h"
 
 #define BUFF_SIZE 1024
+#define MAX_READ_OUTPUT_SIZE 4096
+#define STDIN 0
+#define STDOUT 1
+
 void solve(char *line);
 
 int main(int argc, char const *argv[])
@@ -14,10 +18,24 @@ int main(int argc, char const *argv[])
         perror("setvbuf failed");
     }
     
+    //initial tasks
     for (int i = 0; i < argc; i++) {
         solve((char *) argv[i]);
     }
+
+    //new tasks
+    char read_output[MAX_READ_OUTPUT_SIZE + 1];
+    int read_return = 0;
     
+    while ((read_return = read(STDIN, read_output, MAX_READ_OUTPUT_SIZE)) != 0) {
+
+        if (read_return == -1)
+            error_handler("read: ");
+
+        read_output[read_return] = 0;
+        solve(read_output);
+    }
+
     return 0;
 
 }

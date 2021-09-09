@@ -7,8 +7,8 @@
 #include <string.h>
 
 #define MAX_INIT_CHILDS 5
-#define MIN_TASKS_PER_CHILD 3
-#define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) <= pending_tasks ? MIN_TASKS_PER_CHILD : 1)
+#define MIN_initial_tasks_per_child 3
+#define INITIAL_initial_tasks_per_child(childs_count, pending_tasks) (((MIN_initial_tasks_per_child)*childs_count) <= pending_tasks ? MIN_initial_tasks_per_child : 1)
 #define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_INIT_CHILDS > total_tasks ? total_tasks : MAX_INIT_CHILDS)
 #define MAX_READ_OUTPUT_SIZE 4096
 
@@ -19,7 +19,7 @@ typedef struct {
     pid_t pid;
 } t_child;
 
-void initialize_pipes(t_child pipes[], int childs_count, int * max_fd);
+void initialize_pipes(t_child pipes[], int childs_count, int * highest_fd);
 void close_pipes(t_child child);
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx);
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
@@ -52,8 +52,8 @@ int main(int argc, char const *argv[])
 
     t_child pipes[childs_count];
 
-    int max_fd = -1;
-    initialize_pipes(pipes, childs_count, &max_fd);
+    int highest_fd = -1;
+    initialize_pipes(pipes, childs_count, &highest_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
     
     fd_set read_set, ready_set;
@@ -64,14 +64,14 @@ int main(int argc, char const *argv[])
             ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
 
         build_read_set(pipes, &read_set, childs_count);
-        if (select(max_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+        if (select(highest_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
             error_handler("select: ");
         }
 
         for(int i = 0; i < childs_count; i++) {
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
                 int read_return;
-                char read_output[MAX_READ_OUTPUT_SIZE];
+                char read_output[MAX_READ_OUTPUT_SIZE + 1];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
                     error_handler("read: ");
@@ -138,7 +138,7 @@ void build_read_set(t_child pipes[], fd_set * read_set, int childs_count) {
     }
 }
 
-void initialize_pipes(t_child pipes[], int childs_count, int * max_fd) { 
+void initialize_pipes(t_child pipes[], int childs_count, int * highest_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe: ");
@@ -146,8 +146,8 @@ void initialize_pipes(t_child pipes[], int childs_count, int * max_fd) {
             if(pipe(pipes[i].parent_to_child) == -1) {
                 error_handler("Pipe: ");
             }
-            if(pipes[i].parent_to_child[1] > *max_fd) {
-                *max_fd = pipes[i].child_to_parent[0];
+            if(pipes[i].parent_to_child[1] > *highest_fd) {
+                *highest_fd = pipes[i].child_to_parent[0];
             }
     }
 
@@ -168,11 +168,11 @@ void close_pipes(t_child child){
 
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx) {
     
-    int tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
+    int initial_tasks_per_child = INITIAL_initial_tasks_per_child(childs_count, total_tasks);
 
     for(int i = 0; i < childs_count; i++) {
-        char * child_tasks[tasks_per_child + 1];
-        child_tasks[tasks_per_child] = NULL;
+        char * child_tasks[initial_tasks_per_child + 1];
+        child_tasks[initial_tasks_per_child] = NULL;
         if ((pipes[i].pid = fork()) == -1) {
             error_handler("Fork: ");
         }
@@ -183,7 +183,7 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
             if(dup2(pipes[i].parent_to_child[0], 0) == -1)
                 error_handler("Dup2: ");
             close_pipes(pipes[i]);
-            for(int j = 0; j < tasks_per_child; j++)
+            for(int j = 0; j < initial_tasks_per_child; j++)
                 child_tasks[j] = tasks[(*current_task_idx)++];
             if (execv(slave_file_name, child_tasks) == -1) {
                 perror("Execv: ");  
@@ -191,7 +191,7 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
         } 
         //parent
         else {
-            *current_task_idx += tasks_per_child;
+            *current_task_idx += initial_tasks_per_child;
             //close unused fd
             if(close(pipes[i].child_to_parent[1]) == -1)
                error_handler("Closing ctpw FD: ");
