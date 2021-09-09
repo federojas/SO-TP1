@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
         perror("setvbuf failed");
     }
     
-    for (size_t i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         solve((char *) argv[i]);
     }
     
@@ -41,12 +41,12 @@ void solve(char *file){
     minisat_output[count] = 0;
 
     if (ferror(result_stream)){
-        fprint(stderr, "fread error");
+        fprintf(stderr, "fread error");
     }
 
     //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
     //nos comunicados por FD 1 con el master
-    printf("%s %s %d", minisat_output, file, getpid());
+    printf("%s%s %d_END_", minisat_output, file, getpid());
     if(pclose(result_stream) == -1) {
         error_handler("pclose: ");
     }

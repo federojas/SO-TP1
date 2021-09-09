@@ -4,10 +4,12 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include "error_handling.h"
+#include <string.h>
 
 #define MAX_INIT_CHILDS 5
 #define MIN_TASKS_PER_CHILD 3
-#define TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) > pending_tasks ? 1 : MIN_TASKS_PER_CHILD)
+#define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MIN_TASKS_PER_CHILD)*childs_count) <= pending_tasks ? MIN_TASKS_PER_CHILD : 1)
+#define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_INIT_CHILDS > total_tasks ? total_tasks : MAX_INIT_CHILDS)
 #define MAX_READ_OUTPUT_SIZE 4096
 
 
@@ -17,10 +19,12 @@ typedef struct {
     pid_t pid;
 } t_child;
 
-void initialize_pipes(t_child pipes[], size_t childs_count, int * max_fd);
+void initialize_pipes(t_child pipes[], int childs_count, int * max_fd);
 void close_pipes(t_child child);
-void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx);
-void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count);
+void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx);
+void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
+int calculate_solved_tasks(char* read_output);
+void send_task(t_child pipe, char * const* tasks, int * current_task_idx);
 
 
 const char* slave_file_name = "./slave"; //insert slave file name
@@ -37,22 +41,24 @@ int main(int argc, char const *argv[])
         error_handler("setvbuff");
     }
     
-    size_t total_tasks = argc - 1;
-    size_t task_idx = 0;
-    size_t solved_tasks = 0;
+    int total_tasks = argc - 1;
+    int current_task_idx = 0;
+    int solved_tasks = 0;
     char const **tasks = argv + 1;
 
     // Initialize new childs
 
-    size_t childs_count = MAX_INIT_CHILDS > total_tasks ? total_tasks : MAX_INIT_CHILDS;
+    int childs_count = CALCULATE_CHILDS_COUNT(total_tasks);
 
     t_child pipes[childs_count];
 
     int max_fd = -1;
     initialize_pipes(pipes, childs_count, &max_fd);
-    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &task_idx);
+    initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
     
     fd_set read_set, ready_set;
+
+    //read child outputs
     while(solved_tasks < total_tasks) {
             //select is destructive
             ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
@@ -62,22 +68,34 @@ int main(int argc, char const *argv[])
             error_handler("select: ");
         }
 
-        //aca el for deberia ir de i hasta los max fd?
         for(int i = 0; i < childs_count; i++) {
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
-                size_t read_return;
+                int read_return;
                 char read_output[MAX_READ_OUTPUT_SIZE];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
                     error_handler("read: ");
                 } else if(read_return != 0) {
+                    
+                    read_output[read_return] = 0;
+
+                    int solved_tasks_count = calculate_solved_tasks(read_output);
+                    while(solved_tasks_count < 0) {
+                        solved_tasks++;
+                        solved_tasks_count--;
+                    }
+                
                     printf("%s", read_output);
-                    solved_tasks++;
+                    
+                    //assign a signle new task to current the child
+                    if (current_task_idx < total_tasks)
+                        send_task(pipes[i],(char * const*)tasks, &current_task_idx);
                 }
             }
         }
 
     } 
+                              
     //close remaining fd
     for(int i = 0; i < childs_count; i++) {
         if(close(pipes[i].child_to_parent[0]) == -1)
@@ -88,14 +106,39 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
+void send_task(t_child child_pipes, char * const* tasks, int * current_task_idx) {
+    int task_length = strlen(tasks[*current_task_idx]) + 1;
+    if (write(child_pipes.parent_to_child[1], tasks[*current_task_idx], task_length)== -1) {
+        error_handler("write: ");
+    }
+    (*current_task_idx)++;
+}
+
+//https://qnaplus.com/count-occurrences-of-a-substring-in-a-string-in-c/
+int calculate_solved_tasks(char* read_output) {
+  int i, j, l1, l2;
+  int count = 0;
+
+  l1 = strlen(read_output);
+  l2 = 5;
+
+  for(i = 0; i < l1 - l2 + 1; i++) {
+    if(strstr(read_output + i, "_END_") == read_output + i) {
+      count++;
+      i = i + l2 -1;
+    }
+  }
+  return count;
+}
+
+void build_read_set(t_child pipes[], fd_set * read_set, int childs_count) {
     FD_ZERO(read_set); //set reinitialized
     for (int i = 0; i < childs_count; i++) {
             FD_SET(pipes[i].child_to_parent[0], read_set);
     }
 }
 
-void initialize_pipes(t_child pipes[], size_t childs_count, int * max_fd) { 
+void initialize_pipes(t_child pipes[], int childs_count, int * max_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe: ");
@@ -123,9 +166,10 @@ void close_pipes(t_child child){
 }
 
 
-void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx) {
+void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx) {
     
-    int tasks_per_child = TASKS_PER_CHILD(childs_count, total_tasks);
+    int tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
+
     for(int i = 0; i < childs_count; i++) {
         char * child_tasks[tasks_per_child + 1];
         child_tasks[tasks_per_child] = NULL;
@@ -140,14 +184,14 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
                 error_handler("Dup2: ");
             close_pipes(pipes[i]);
             for(int j = 0; j < tasks_per_child; j++)
-                child_tasks[j] = tasks[(*task_idx)++];
+                child_tasks[j] = tasks[(*current_task_idx)++];
             if (execv(slave_file_name, child_tasks) == -1) {
                 perror("Execv: ");  
             }
         } 
         //parent
         else {
-            *task_idx += tasks_per_child;
+            *current_task_idx += tasks_per_child;
             //close unused fd
             if(close(pipes[i].child_to_parent[1]) == -1)
                error_handler("Closing ctpw FD: ");
