@@ -15,7 +15,6 @@ typedef struct {
     int child_to_parent[2];
     int parent_to_child[2];
     pid_t pid;
-    size_t open;
 } t_child;
 
 void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd);
@@ -70,27 +69,28 @@ int main(int argc, char const *argv[])
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
                     error_handler("read: ");
-                } else if(read_return == 0) {
-                    pipes[i].open = 0;
-                    close(pipes[i].child_to_parent[0]);
-                } else {
+                } else if(read_return != 0) {
                     printf("%s", read_output);
+                    solved_tasks++;
                 }
             }
         }
 
+    } 
+    //close remaining fd
+    for(int i = 0; i < childs_count; i++) {
+        if(close(pipes[i].child_to_parent[0]) == -1)
+            error_handler("Closing ctpr FD: ");
+        if(close(pipes[i].parent_to_child[1]) == -1)
+            error_handler("Closing ptcw FD: ");
     }
-    
-
     return 0;
 }
 
 void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
     FD_ZERO(read_set); //set reinitialized
     for (int i = 0; i < childs_count; i++) {
-        if (pipes[i].open == 1) {
             FD_SET(pipes[i].child_to_parent[0], read_set);
-        }
     }
 }
 
@@ -103,23 +103,23 @@ void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) {
                 error_handler("Pipe: ");
             }
             if(pipes[i].parent_to_child[1] > *max_fd) {
-                *max_fd = pipes[i].parent_to_child[1];
+                *max_fd = pipes[i].child_to_parent[0];
             }
-            pipes[i].open = 1;
     }
     return;
 }
 
 void close_pipes(t_child child){
     if(close(child.parent_to_child[0]) == -1)
-        error_handler("Closing FD: ");
+        error_handler("Closing ptcr FD: ");
     if(close(child.parent_to_child[1]) == -1)
-        error_handler("Closing FD: ");
+        error_handler("Closing ptcw FD: ");
     if(close(child.child_to_parent[0]) == -1)
-        error_handler("Closing FD: ");
+        error_handler("Closing ctpr FD: ");
     if(close(child.child_to_parent[1]) == -1)
-        error_handler("Closing FD: ");
+        error_handler("Closing ctpw FD: ");
 }
+
 
 void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx) {
     
@@ -146,10 +146,11 @@ void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, 
         //parent
         else {
             *task_idx += tasks_per_child;
+            //close unused fd
             if(close(pipes[i].child_to_parent[1]) == -1)
-               error_handler("Closing FD: ");
+               error_handler("Closing ctpw FD: ");
             if(close(pipes[i].parent_to_child[0]) == -1)
-               error_handler("Closing FD: ");
+               error_handler("Closing ptcr FD: ");
         }
     }
 
