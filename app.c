@@ -17,7 +17,7 @@ typedef struct {
     pid_t pid;
 } t_child;
 
-void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd);
+void initialize_pipes(t_child pipes[], size_t childs_count, int * max_fd);
 void close_pipes(t_child child);
 void initialize_forks(t_child pipes[], size_t childs_count, size_t total_tasks, char * const* tasks, size_t * task_idx);
 void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count);
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
 
     t_child pipes[childs_count];
 
-    size_t max_fd = -1;
+    int max_fd = -1;
     initialize_pipes(pipes, childs_count, &max_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &task_idx);
     
@@ -95,7 +95,7 @@ void build_read_set(t_child pipes[], fd_set * read_set, size_t childs_count) {
     }
 }
 
-void initialize_pipes(t_child pipes[], size_t childs_count, size_t * max_fd) { 
+void initialize_pipes(t_child pipes[], size_t childs_count, int * max_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe: ");
