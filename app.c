@@ -5,6 +5,12 @@
 #include <sys/time.h>
 #include "error_handling.h"
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <sys/stat.h>        /* For mode constants */
+#include <fcntl.h>
+#include "libUtil.h"
+#include <semaphore.h>
 
 #define MAX_CHILDS 5
 #define MAX_INITIAL_TASKS_PER_CHILD 3
@@ -25,6 +31,7 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
 int calculate_solved_tasks(char* read_output);
 void send_task(t_child pipe, char * const* tasks, int * current_task_idx);
+
 
 
 const char* slave_file_name = "./slave"; //insert slave file name
@@ -68,6 +75,19 @@ int main(int argc, char const *argv[])
 
     fd_set read_set, ready_set;
 
+    //initialize shm
+    struct meminfoCDT *meminfo=malloc(sizeof(struct meminfoCDT));
+    meminfo->fd=init_shm(SHR_MEM_NAME, total_tasks * MAX_READ_OUTPUT_SIZE, meminfo->base);
+
+    //creamos el semaforo
+    sem_t *sem=sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
+    if(sem==SEM_FAILED){
+        //error manager
+    }
+    FILE *output;
+      if ((output = fopen("output.txt", "w")) == NULL)
+            //error manager
+
     //read child outputs
     while(solved_tasks < total_tasks) {
             //select is destructive
@@ -90,16 +110,37 @@ int main(int argc, char const *argv[])
                     read_output[read_return] = 0;
 
                     int solved_tasks_count = calculate_solved_tasks(read_output);
+
+                    //------------------------------------------------------------------------------------------------------------------------------------
+                    // OJO QUE ACA DEBERIA IR UN MAYOR ME PARECE, IGUAL NO RESUELVE LO DE QUE HACE 10 TAREAS Y PINCHA 
                     while(solved_tasks_count < 0) {
                         solved_tasks++;
                         solved_tasks_count--;
                     }
-                
+                    //------------------------------------------------------------------------------------------------------------------------------------
+
                     printf("%s", read_output);
-                    
+
                     //assign a signle new task to current the child
                     if (current_task_idx < total_tasks)
                         send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+
+                    //FALTAN CLOSES??
+
+
+                    //aca quiero abrir la shm para que la view pueda acceder a las respuestas del slave
+
+                    //creamos el semaforo
+                    sem_t *sem=sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
+                    if(sem==SEM_FAILED){
+                        //error manager
+                    }               
+                    FILE *output;
+                    if ((output = fopen("output.txt", "w")) == NULL){
+                        //error manager
+
+                    }
+
                 }
             }
         }
@@ -115,6 +156,7 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+
 
 void send_task(t_child child_pipes, char * const* tasks, int * current_task_idx) {
     int task_length = strlen(tasks[*current_task_idx]) + 1;
