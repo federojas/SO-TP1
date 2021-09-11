@@ -42,3 +42,13 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
     } 
     return shared_data;
 }
+
+sem_t *getMutexSem(sharedData data){
+    return data->mutexSem;
+}
+sem_t *getFullSem(sharedData data){
+    return data->fullSem;
+}
+char *getShmBase(sharedData data){
+    return data->shmBase;
+}

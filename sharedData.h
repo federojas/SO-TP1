@@ -16,7 +16,7 @@
 
 typedef struct sharedDataCDT *sharedData;
 sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int shmSize);
-sem_t *getMutexSem();
-sem_t *getFullSem();
-char *getShmBase();
+sem_t *getMutexSem(sharedData data);
+sem_t *getFullSem(sharedData data);
+char *getShmBase(sharedData data);
 #endif 
