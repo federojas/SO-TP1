@@ -23,9 +23,8 @@ int main(int argc, char const *argv[])
     int read_return = 0;
 
     while ((read_return = read(STDIN, read_output, MAX_READ_OUTPUT_SIZE)) != 0) {
-
         if (read_return == -1)
-            error_handler("read: ");
+            error_handler("read");
 
         read_output[read_return] = 0;
         solve(read_output);
@@ -46,7 +45,7 @@ void solve(char *file){
     
     FILE* result_stream = popen(result, "r");
     if (result_stream == NULL) {
-        error_handler("popen: ");
+        error_handler("popen");
     }
     
     int count = fread(minisat_output, sizeof(char), BUFF_SIZE, result_stream);
@@ -59,8 +58,8 @@ void solve(char *file){
 
     //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
     //nos comunicados por FD 1 con el master
-    printf("%s%s %d_END_", minisat_output, file, getpid());
+    printf("%s%s %d", minisat_output, file, getpid());
     if(pclose(result_stream) == -1) {
-        error_handler("pclose: ");
+        error_handler("pclose");
     }
 }
