@@ -1,5 +1,4 @@
 #include <sys/shm.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
@@ -10,9 +9,10 @@
 #include <sys/stat.h>
 
 #include "sharedData.h"
+#include <stdio.h>
 #define MAX_READ_OUTPUT_SIZE 4096
 
-#define TOTAL_TASKS_MAGIK_NUMBER 21 //SACAR ESTO DESPUES ES SOLO PARA PROBAR 
+#define TOTAL_TASKS_MAGIK_NUMBER 22 //SACAR ESTO DESPUES ES SOLO PARA PROBAR 
 
 int main(int argc, char **argv) {
 
@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
         sem_wait(mutexSem);
         (*(long *)shmBase)--;
         printf("%s", shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE);
+        printf("asdasdasdasda\n");
         sem_post(mutexSem);
 
     }
