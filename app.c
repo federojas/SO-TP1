@@ -49,6 +49,7 @@ int main(int argc, char const *argv[])
     }
     
     int total_tasks = argc - 1;
+    printf("TOTAL TASKS=%d\n",total_tasks);
     int current_task_idx = 0;
     int solved_tasks = 0;
     char const **tasks = argv + 1;
@@ -80,61 +81,73 @@ int main(int argc, char const *argv[])
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
-
-    //read child outputs
-    while(solved_tasks < total_tasks) {
-            //select is destructive
-            ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
-
-        build_read_set(pipes, &read_set, childs_count);
-        if (select(highest_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
-            error_handler("select: ");
-        }
-
-        for(int i = 0; i < childs_count; i++) {
-            if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
-                int read_return;
-                char read_output[MAX_READ_OUTPUT_SIZE + 1];
-                read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
-                if(read_return == -1) {
-                    error_handler("read: ");
-                } else if(read_return != 0) {
-                    
-                    read_output[read_return] = 0;
-
-                    int solved_tasks_count = calculate_solved_tasks(read_output);
-
-                    //------------------------------------------------------------------------------------------------------------------------------------
-                    // OJO QUE ACA DEBERIA IR UN MAYOR ME PARECE, IGUAL NO RESUELVE LO DE QUE HACE 10 TAREAS Y PINCHA 
-                    while(solved_tasks_count < 0) {
-                        solved_tasks++;
-                        solved_tasks_count--;
-                    }
-                    //------------------------------------------------------------------------------------------------------------------------------------
-
-                    printf("%s", read_output);
-
-                    //assign a signle new task to current the child
-                    if (current_task_idx < total_tasks)
-                        send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-
-                    //FALTAN CLOSES??
-
-                    //shm tasks
-                    sem_wait(mutexSem);
+    //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
+    int i=0;
+    while(i<10){
+        i++;
+        sem_wait(mutexSem);
                         sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
                         //sprintf(shmBase,"%s\n", "hola");                    
                         (*(long *)shmBase)++;
 
                     sem_post(mutexSem);
                     sem_post(fullSem);
+    }
+    //-------------------------------------------------------------------------------------------------
+    //read child outputs
+    // while(solved_tasks < total_tasks) {
+    //         //select is destructive
+    //         ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
 
-                }
-            }
-        }
+    //     build_read_set(pipes, &read_set, childs_count);
+    //     if (select(highest_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+    //         error_handler("select: ");
+    //     }
+
+    //     for(int i = 0; i < childs_count; i++) {
+    //         if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
+    //             int read_return;
+    //             char read_output[MAX_READ_OUTPUT_SIZE + 1];
+    //             read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
+    //             if(read_return == -1) {
+    //                 error_handler("read: ");
+    //             } else if(read_return != 0) {
+                    
+    //                 read_output[read_return] = 0;
+
+    //                 int solved_tasks_count = calculate_solved_tasks(read_output);
+
+    //                 //------------------------------------------------------------------------------------------------------------------------------------
+    //                 // OJO QUE ACA DEBERIA IR UN MAYOR ME PARECE, IGUAL NO RESUELVE LO DE QUE HACE 10 TAREAS Y PINCHA 
+    //                 while(solved_tasks_count > 0) {
+    //                     solved_tasks++;
+    //                     solved_tasks_count--;
+    //                 }
+    //                 //------------------------------------------------------------------------------------------------------------------------------------
+
+    //                 printf("%s", read_output);
+
+    //                 //assign a signle new task to current the child
+    //                 if (current_task_idx < total_tasks)
+    //                     send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+
+    //                 //FALTAN CLOSES??
+
+    //                 //shm tasks
+    //                 // sem_wait(mutexSem);
+    //                 //     // sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
+    //                 //     // //sprintf(shmBase,"%s\n", "hola");                    
+    //                 //     // (*(long *)shmBase)++;
+
+    //                 // sem_post(mutexSem);
+    //                 // sem_post(fullSem);
+
+    //             }
+    //         }
+    //     }
 
 
-    } 
+    // } 
                               
     //close remaining fd
     for(int i = 0; i < childs_count; i++) {
