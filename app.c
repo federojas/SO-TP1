@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>
-#include "libUtil.h"
+#include "sharedData.h"
 #include <semaphore.h>
 
 #define MAX_CHILDS 5
@@ -75,19 +75,8 @@ int main(int argc, char const *argv[])
 
     fd_set read_set, ready_set;
 
-    //initialize shm
-    struct meminfoCDT *meminfo=malloc(sizeof(struct meminfoCDT));
-    meminfo->fd=init_shm(SHR_MEM_NAME, total_tasks * MAX_READ_OUTPUT_SIZE, meminfo->base);
-
-    //creamos el semaforo
-    sem_t *sem=sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
-    if(sem==SEM_FAILED){
-        //error manager
-    }
-    FILE *output;
-      if ((output = fopen("output.txt", "w")) == NULL)
-            //error manager
-
+    //initialize all shared data that will be used
+    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
     //read child outputs
     while(solved_tasks < total_tasks) {
             //select is destructive
@@ -130,16 +119,7 @@ int main(int argc, char const *argv[])
 
                     //aca quiero abrir la shm para que la view pueda acceder a las respuestas del slave
 
-                    //creamos el semaforo
-                    sem_t *sem=sem_open(SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH, 0);
-                    if(sem==SEM_FAILED){
-                        //error manager
-                    }               
-                    FILE *output;
-                    if ((output = fopen("output.txt", "w")) == NULL){
-                        //error manager
-
-                    }
+                    
 
                 }
             }
