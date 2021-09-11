@@ -80,6 +80,7 @@ int main(int argc, char const *argv[])
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
+
     //read child outputs
     while(solved_tasks < total_tasks) {
             //select is destructive
@@ -119,14 +120,19 @@ int main(int argc, char const *argv[])
 
                     //FALTAN CLOSES??
 
+                    //shm tasks
+                    sem_wait(mutexSem);
+                        sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
+                        //sprintf(shmBase,"%s\n", "hola");                    
+                        (*(long *)shmBase)++;
 
-                    //aca quiero abrir la shm para que la view pueda acceder a las respuestas del slave
-
-                    
+                    sem_post(mutexSem);
+                    sem_post(fullSem);
 
                 }
             }
         }
+
 
     } 
                               
