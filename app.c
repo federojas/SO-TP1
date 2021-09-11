@@ -21,7 +21,7 @@ typedef struct {
     pid_t pid;
 } t_child;
 
-void initialize_pipes(t_child pipes[], int childs_count, int * highest_fd);
+void initialize_pipes(t_child pipes[], int childs_count, int * highest_ctp_read_fd);
 void close_pipes(t_child child);
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx);
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
@@ -53,8 +53,8 @@ int main(int argc, char const *argv[])
 
     t_child pipes[childs_count];
 
-    int highest_fd = -1;
-    initialize_pipes(pipes, childs_count, &highest_fd);
+    int highest_ctp_read_fd = -1;
+    initialize_pipes(pipes, childs_count, &highest_ctp_read_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
     
 
@@ -75,7 +75,8 @@ int main(int argc, char const *argv[])
             ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
         
         build_read_set(pipes, &read_set, childs_count);
-        if (select(highest_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+
+        if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
             error_handler("select");
         }
         
@@ -95,7 +96,6 @@ int main(int argc, char const *argv[])
                     if (current_task_idx < total_tasks)
                         send_task(pipes[i],(char * const*)tasks, &current_task_idx);
                     solved_tasks++;
-                    printf("%d", solved_tasks);
                 }
             }
         }
@@ -127,7 +127,7 @@ void build_read_set(t_child pipes[], fd_set * read_set, int childs_count) {
     }
 }
 
-void initialize_pipes(t_child pipes[], int childs_count, int * highest_fd) { 
+void initialize_pipes(t_child pipes[], int childs_count, int * highest_ctp_read_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe ctp");
@@ -135,8 +135,8 @@ void initialize_pipes(t_child pipes[], int childs_count, int * highest_fd) {
             if(pipe(pipes[i].parent_to_child) == -1) {
                 error_handler("Pipe ptc");
             }
-            if(pipes[i].child_to_parent[0] > *highest_fd) {
-                *highest_fd = pipes[i].child_to_parent[0];
+            if(pipes[i].child_to_parent[0] > *highest_ctp_read_fd) {
+                *highest_ctp_read_fd = pipes[i].child_to_parent[0];
             }
     }
 
