@@ -90,12 +90,10 @@ int main(int argc, char const *argv[])
     // memcpy(shmBase,auxBuf, sizeof(auxBuf));
     int index=0;
     
-    memcpy(shmBase+index, "chau ", sizeof("chau "));
-    memcpy(shmBase+index, "chau  chau", sizeof("chau "));
 
     while(i<10){
         i++;
-        sleep(1);
+        sleep(10);
         sem_wait(mutexSem);
             printf("dentro del semaforo\n");
             memcpy(shmBase+index, "chau ", sizeof("chau "));

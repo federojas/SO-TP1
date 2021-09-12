@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
     while(i<10){
         i++;
         
-        sem_wait(mutexSem);
         sem_wait(fullSem);
+        sem_wait(mutexSem);
        // memcpy(aux, shmBase, sizeof("chau ")*10);
         printf("la concha de tu madre ");
         // (*(long *)shmBase)--;

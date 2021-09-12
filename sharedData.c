@@ -36,12 +36,12 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
     }
 
     //--------------------------SEM OPENS (with creation flag)----------------------------------------------------------------------------------------------------
-    shared_data->mutexSem = sem_open(mutexPath, O_CREAT |  O_EXCL | O_RDWR, 0660, 1 );
+    shared_data->mutexSem = sem_open(mutexPath, O_CREAT |  O_EXCL , 0660, 1 );
     if(shared_data->mutexSem==SEM_FAILED){
         //error handler
         printf("fallo el primer sem open de init data");
     }
-    shared_data->fullSem = sem_open(fullPath, O_CREAT | O_EXCL | O_RDWR,  0660, 0);
+    shared_data->fullSem = sem_open(fullPath, O_CREAT | O_EXCL,  0660, 0);
     if(shared_data->fullSem==SEM_FAILED){
         //error handler
         printf("fallo el segundo sem open de init data");
