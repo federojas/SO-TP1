@@ -33,9 +33,9 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
 void send_task(t_child pipe, char * const* tasks, int * current_task_idx);
 
-
-
 const char* slave_file_name = "./slave"; //insert slave file name
+const char* answers_file_name = "answers.txt"; //insert answers file name
+
 
 int main(int argc, char const *argv[])
 {
@@ -75,110 +75,68 @@ int main(int argc, char const *argv[])
         }
     }
 
-    fd_set read_set, ready_set;
+    FILE * solve_file = fopen(answers_file_name, "w");
+    if (solve_file == NULL) {
+        error_handler("fopen");
+    }
+
+    fd_set read_set;
 
     //initialize all shared data that will be used
     sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
-    //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
-    int i=0;
-    while(i<10){
-        i++;
-        sem_wait(mutexSem);
-                        sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
-                        //sprintf(shmBase,"%s\n", "hola");                    
-                        (*(long *)shmBase)++;
 
-                    sem_post(mutexSem);
-                    sem_post(fullSem);
-    }
-    //-------------------------------------------------------------------------------------------------
-    //read child outputs
-    // while(solved_tasks < total_tasks) {
-    //         //select is destructive
-    //         ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
+    
+    // //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
+    // int i=0;
+    // while(i<10){
+    //     i++;
+    //     sem_wait(mutexSem);
+    //                     sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
+    //                     //sprintf(shmBase,"%s\n", "hola");                    
+    //                     (*(long *)shmBase)++;
 
-    //     build_read_set(pipes, &read_set, childs_count);
-    //     if (select(highest_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
-    //         error_handler("select: ");
-    //     }
+    //                 sem_post(mutexSem);
+    //                 sem_post(fullSem);
+    // }
 
-    //     for(int i = 0; i < childs_count; i++) {
-    //         if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
-    //             int read_return;
-    //             char read_output[MAX_READ_OUTPUT_SIZE + 1];
-    //             read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
-    //             if(read_return == -1) {
-    //                 error_handler("read: ");
-    //             } else if(read_return != 0) {
-                    
-    //                 read_output[read_return] = 0;
-
-    //                 int solved_tasks_count = calculate_solved_tasks(read_output);
-
-    //                 //------------------------------------------------------------------------------------------------------------------------------------
-    //                 // OJO QUE ACA DEBERIA IR UN MAYOR ME PARECE, IGUAL NO RESUELVE LO DE QUE HACE 10 TAREAS Y PINCHA 
-    //                 while(solved_tasks_count > 0) {
-    //                     solved_tasks++;
-    //                     solved_tasks_count--;
-    //                 }
-    //                 //------------------------------------------------------------------------------------------------------------------------------------
     while(solved_tasks < total_tasks) {
-            //select is destructive
-            ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
-        
         build_read_set(pipes, &read_set, childs_count);
-
         if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
-            error_handler("select");
+            error_handler("select: ");
         }
-        
+
         for(int i = 0; i < childs_count; i++) {
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
                 int read_return;
                 char read_output[MAX_READ_OUTPUT_SIZE + 1];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
-                    error_handler("read");
+                    error_handler("read: ");
                 } else if(read_return != 0) {
                     read_output[read_return] = 0;
 
-                    //printf("%s\n", read_output);
-                    
-                    //assign a signle new task to the current child
+                    //assign a signle new task to current the child
                     if (current_task_idx < total_tasks)
                         send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+
+                    //shared memory
+                    char * answer = strtok(read_output, "\n");
+                    sem_wait(mutexSem);
+                    sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", answer);
+                    (*(long *)shmBase)++;
+                    sem_post(mutexSem);
+                    sem_post(fullSem);
+                    fprintf(solve_file, "%s\n", answer);
                     solved_tasks++;
                 }
             }
         }
 
-    //                 printf("%s", read_output);
+    fclose(solve_file);
 
-    //                 //assign a signle new task to current the child
-    //                 if (current_task_idx < total_tasks)
-    //                     send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-
-    //                 //FALTAN CLOSES??
-
-    //                 //shm tasks
-    //                 // sem_wait(mutexSem);
-    //                 //     // sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
-    //                 //     // //sprintf(shmBase,"%s\n", "hola");                    
-    //                 //     // (*(long *)shmBase)++;
-
-    //                 // sem_post(mutexSem);
-    //                 // sem_post(fullSem);
-
-    //             }
-    //         }
-    //     }
-
-
-    // } 
-                              
     //close remaining fd
     for(int i = 0; i < childs_count; i++) {
         if(close(pipes[i].child_to_parent[0]) == -1)
