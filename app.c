@@ -38,8 +38,7 @@ const char* slave_file_name = "./slave"; //insert slave file name
 const char* answers_file_name = "answers.txt"; //insert answers file name
 
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     if(argc < 2) {
         fprintf(stderr, "Usage: %s <files>\n", argv[0]);
         exit(EXIT_FAILURE);
@@ -51,7 +50,6 @@ int main(int argc, char const *argv[])
     }
     
     int total_tasks = argc - 1;
-    printf("TOTAL TASKS=%d\n",total_tasks);
     int current_task_idx = 0;
     int solved_tasks = 0;
     char const **tasks = argv + 1;
@@ -90,23 +88,12 @@ int main(int argc, char const *argv[])
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
-    // //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
-    // int i=0;
-    // while(i<10){
-    //     i++;
-    //     sem_wait(mutexSem);
-    //                     sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
-    //                     //sprintf(shmBase,"%s\n", "hola");                    
-    //                     (*(long *)shmBase)++;
-
-    //                 sem_post(mutexSem);
-    //                 sem_post(fullSem);
-    // }
+    sleep(5);
 
     while(solved_tasks < total_tasks) {
         build_read_set(pipes, &read_set, childs_count);
         if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
-            error_handler("select: ");
+            error_handler("select");
         }
 
         for(int i = 0; i < childs_count; i++) {
@@ -115,7 +102,7 @@ int main(int argc, char const *argv[])
                 char read_output[MAX_READ_OUTPUT_SIZE + 1];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
                 if(read_return == -1) {
-                    error_handler("read: ");
+                    error_handler("read");
                 } else if(read_return != 0) {
                     read_output[read_return] = 0;
 
@@ -125,17 +112,23 @@ int main(int argc, char const *argv[])
 
                     //shared memory
                     char * answer = strtok(read_output, "\n");
-                    sem_wait(mutexSem);
+                    if(sem_wait(mutexSem) == -1) {
+                        error_handler("sem_wait");
+                    }
                     sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", answer);
                     (*(long *)shmBase)++;
-                    sem_post(mutexSem);
-                    sem_post(fullSem);
+                    if(sem_post(mutexSem) == -1) {
+                        error_handler("sem_post");
+                    }
+                    if(sem_post(fullSem) == -1) {
+                        error_handler("sem_post");
+                    }
                     fprintf(solve_file, "%s\n", answer);
                     solved_tasks++;
                 }
             }
         }
-
+    }
     fclose(solve_file);
 
     //close remaining fd
@@ -204,9 +197,9 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
         //child
         else if(pipes[i].pid == 0) {
             if(dup2(pipes[i].child_to_parent[1], STDOUT)  == -1)
-                error_handler("dup2: ");
+                error_handler("dup2 ctpw");
             if(dup2(pipes[i].parent_to_child[0], STDIN) == -1)
-                error_handler("dup2: ");
+                error_handler("dup2 ptcr");
             close_pipes(pipes[i]);
             if (execv(slave_file_name, execv_parameter) == -1) {
                 perror("execv");  

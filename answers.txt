@@ -1,0 +1,2 @@
+Number of variables:           718
+Number of variables:          1931
