@@ -104,27 +104,35 @@ int main(int argc, char const *argv[]) {
                 if(read_return == -1) {
                     error_handler("read");
                 } else if(read_return != 0) {
+
                     read_output[read_return] = 0;
 
-                    //assign a signle new task to current the child
-                    if (current_task_idx < total_tasks)
-                        send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-
-                    //shared memory
                     char * answer = strtok(read_output, "\n");
-                    if(sem_wait(mutexSem) == -1) {
-                        error_handler("sem_wait");
+                    while(answer != NULL) {
+
+                        //assign a single new task to the current child
+                        if (current_task_idx < total_tasks)
+                            send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+
+                        //shared memory
+                        
+                        if(sem_wait(mutexSem) == -1) {
+                            error_handler("sem_wait");
+                        }
+                        sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", answer);
+                        (*(long *)shmBase)++;
+                        if(sem_post(mutexSem) == -1) {
+                            error_handler("sem_post");
+                        }
+                        if(sem_post(fullSem) == -1) {
+                            error_handler("sem_post");
+                        }
+                        fprintf(solve_file, "%s\n", answer);
+
+                        answer = strtok(NULL, "\n");
+
+                        solved_tasks++;
                     }
-                    sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", answer);
-                    (*(long *)shmBase)++;
-                    if(sem_post(mutexSem) == -1) {
-                        error_handler("sem_post");
-                    }
-                    if(sem_post(fullSem) == -1) {
-                        error_handler("sem_post");
-                    }
-                    fprintf(solve_file, "%s\n", answer);
-                    solved_tasks++;
                 }
             }
         }

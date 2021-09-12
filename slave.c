@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include "error_handling.h"
 
-#define BUFF_SIZE 1024
 #define MAX_READ_OUTPUT_SIZE 4096
 #define STDIN 0
 #define STDOUT 1
@@ -35,10 +34,10 @@ int main(int argc, char const *argv[])
 }
 
 void solve(char *file){
-    char result[BUFF_SIZE + 1]; 
-    char minisat_output[BUFF_SIZE + 1];
+    char result[MAX_READ_OUTPUT_SIZE + 1]; 
+    char minisat_output[MAX_READ_OUTPUT_SIZE + 1];
     
-    int check = sprintf(result, "minisat %s | grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"", file);
+    int check = sprintf(result, "minisat %s | grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\" | tr \"\\n\" \"\\t\" | tr -d \" \\t\"", file);
     if(check == -1) {
         fprintf(stderr, "sprintf error");
     }
@@ -48,7 +47,7 @@ void solve(char *file){
         error_handler("popen");
     }
     
-    int count = fread(minisat_output, sizeof(char), BUFF_SIZE, result_stream);
+    int count = fread(minisat_output, sizeof(char), MAX_READ_OUTPUT_SIZE, result_stream);
 
     minisat_output[count] = 0;
 
@@ -56,9 +55,17 @@ void solve(char *file){
         fprintf(stderr, "fread error");
     }
 
+    int number_of_variables, number_of_clauses;
+    float cpu_time;
+    char satisfiability[14] = {0};
+
+    if (sscanf(minisat_output, "Numberofvariables:%10dNumberofclauses:%10dCPUtime:%10fs%13s", &number_of_variables, &number_of_clauses, &cpu_time, satisfiability) == EOF) {
+        error_handler("sscanf");
+    }
+
     //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
     //nos comunicados por FD 1 con el master
-    printf("%s%s %d", minisat_output, file, getpid());
+    printf("PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
     if(pclose(result_stream) == -1) {
         error_handler("pclose");
     }
