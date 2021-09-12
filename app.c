@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,6 +14,8 @@
 #include <string.h>
 #include "sharedData.h"
 #include <semaphore.h>
+
+
 
 #define MAX_CHILDS 5
 #define MAX_INITIAL_TASKS_PER_CHILD 3
@@ -58,6 +62,7 @@ int main(int argc, char const *argv[]) {
     if (solve_file == NULL) {
         error_handler("fopen");
     }
+
     //initialize all shared memory that will be used
     sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
     sem_t *mutexSem=getMutexSem(shared_data);
@@ -127,7 +132,7 @@ int main(int argc, char const *argv[]) {
                         fprintf(solve_file, "%s\n", answer);
 
                         answer = strtok(NULL, "\n");
-
+        
                         solved_tasks++;
                     }
                 }

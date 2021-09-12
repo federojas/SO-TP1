@@ -1,7 +1,11 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include "error_handling.h"
+
+
 
 #define MAX_READ_OUTPUT_SIZE 4096
 #define STDIN 0
