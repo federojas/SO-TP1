@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>
+#include <string.h>
 #include "sharedData.h"
 #include <semaphore.h>
 
@@ -83,11 +84,11 @@ int main(int argc, char const *argv[])
     fd_set read_set;
 
     //initialize all shared data that will be used
-    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
+    //sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
+    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH,SIZE_TEMPORAL_DESPUES_BORRAR );
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
-
     
     // //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
     // int i=0;
