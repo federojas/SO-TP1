@@ -54,8 +54,20 @@ int main(int argc, char const *argv[]) {
     int solved_tasks = 0;
     char const **tasks = argv + 1;
 
-    // Initialize new childs
+    FILE * solve_file = fopen(answers_file_name, "w");
+    if (solve_file == NULL) {
+        error_handler("fopen");
+    }
+    //initialize all shared memory that will be used
+    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
+    sem_t *mutexSem=getMutexSem(shared_data);
+    sem_t *fullSem=getMutexSem(shared_data);
+    char *shmBase=getShmBase(shared_data);
+    
+    printf("%d", total_tasks);
+    sleep(5);
 
+    //initialize childs
     int childs_count = CALCULATE_CHILDS_COUNT(total_tasks);
 
     t_child pipes[childs_count];
@@ -74,23 +86,8 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    FILE * solve_file = fopen(answers_file_name, "w");
-    if (solve_file == NULL) {
-        error_handler("fopen");
-    }
-
-    fd_set read_set;
-
-    //initialize all shared data that will be used
-    //sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
-    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH,SIZE_TEMPORAL_DESPUES_BORRAR );
-    sem_t *mutexSem=getMutexSem(shared_data);
-    sem_t *fullSem=getMutexSem(shared_data);
-    char *shmBase=getShmBase(shared_data);
-    
-    sleep(5);
-
     while(solved_tasks < total_tasks) {
+        fd_set read_set;
         build_read_set(pipes, &read_set, childs_count);
         if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
             error_handler("select");
@@ -115,7 +112,6 @@ int main(int argc, char const *argv[]) {
                             send_task(pipes[i],(char * const*)tasks, &current_task_idx);
 
                         //shared memory
-                        
                         if(sem_wait(mutexSem) == -1) {
                             error_handler("sem_wait");
                         }
@@ -127,6 +123,7 @@ int main(int argc, char const *argv[]) {
                         if(sem_post(fullSem) == -1) {
                             error_handler("sem_post");
                         }
+
                         fprintf(solve_file, "%s\n", answer);
 
                         answer = strtok(NULL, "\n");

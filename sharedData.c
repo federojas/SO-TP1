@@ -49,7 +49,6 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
     *(long *)shmBase = 0;
 
     shared_data->shmBase=shmBase;
-    printf("el archivo %s fue creado con exito\n", shmPath);
     return shared_data;
 }
 void unlinkData(sharedData data){

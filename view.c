@@ -12,10 +12,7 @@
 
 #define MAX_READ_OUTPUT_SIZE 4096
 
-#define TOTAL_TASKS_MAGIK_NUMBER 22 //SACAR ESTO DESPUES ES SOLO PARA PROBAR 
-
 int main(int argc, char *argv[]) {
-    sleep(3);
     int task_count = 0;
     if (argc > 2) {
         fprintf(stderr, "Usage: %s <task_count>\n", argv[0]);
@@ -27,7 +24,7 @@ int main(int argc, char *argv[]) {
     else if (argc == 1) {
         scanf("%10d", &task_count);
     }
-    sharedData shared_data=openData(SEM_MUTEX, SEM_FULL,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
+    sharedData shared_data = openData(SEM_MUTEX, SEM_FULL,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);

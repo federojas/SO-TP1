@@ -59,9 +59,7 @@ void solve(char *file){
     float cpu_time;
     char satisfiability[14] = {0};
 
-    if (sscanf(minisat_output, "Numberofvariables:%10dNumberofclauses:%10dCPUtime:%10fs%13s", &number_of_variables, &number_of_clauses, &cpu_time, satisfiability) == EOF) {
-        error_handler("sscanf");
-    }
+    sscanf(minisat_output, "Numberofvariables:%10dNumberofclauses:%10dCPUtime:%10fs%13s", &number_of_variables, &number_of_clauses, &cpu_time, satisfiability);
 
     //usamos printf para utilizar el pipe en lugar de un write con fd pues es mas comodo
     //nos comunicados por FD 1 con el master
