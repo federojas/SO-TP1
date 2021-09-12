@@ -23,14 +23,14 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
 
     //---------------------------SHM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
     //shm open with creation flags 
-    shared_data->shmFd=shm_open(shared_data->shmPath, O_CREAT | O_RDWR | O_EXCL, S_IWUSR | S_IRUSR );
-
-    if(shared_data->shmFd<0){
+    shared_data->shmFd=shm_open(shared_data->shmPath, O_CREAT | O_RDWR ,00660 );
+    if(shared_data->shmFd==-1){
         //error handler
         printf("fallo el shm open de init data\n");
     }
     //puede que aca vaya shmSize+sizeof long o puede que no REVISAR ESTO
-    if(ftruncate(shared_data->shmFd,shmSize+ sizeof(long))<0){
+    //if(ftruncate(shared_data->shmFd,shmSize+ sizeof(long))==-1){
+    if(ftruncate(shared_data->shmFd,SIZE_TEMPORAL_DESPUES_BORRAR)==-1){
         //error handler
         printf("fallo el truncate de init data\n");
     }
@@ -41,13 +41,13 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
         //error handler
         printf("fallo el primer sem open de init data");
     }
-    shared_data->fullSem = sem_open(fullPath, O_CREAT | O_EXCL | O_RDWR,  0660, 1);
+    shared_data->fullSem = sem_open(fullPath, O_CREAT | O_EXCL | O_RDWR,  0660, 0);
     if(shared_data->fullSem==SEM_FAILED){
         //error handler
         printf("fallo el segundo sem open de init data");
     }
     //-------------------------------------MAPPING----------------------------------------------------------------------------------------------------------------
-    char *shmBase =mmap(NULL, shared_data->shmSize + sizeof(long), PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
+    char *shmBase =mmap(NULL, SIZE_TEMPORAL_DESPUES_BORRAR, PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
     //(mmap returns a pointer to a block of memory, in this case shmbase is pointing at that block of memory)
     if(shmBase == MAP_FAILED){
         //error handler
@@ -56,6 +56,7 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
     *(long *)shmBase = 0;
 
     shared_data->shmBase=shmBase;
+    printf("el archivo %s fue creado con exito\n", shmPath);
     return shared_data;
 }
 void unlinkData(sharedData data){
@@ -80,6 +81,7 @@ void unlinkData(sharedData data){
     
 }
 sharedData openData(char *mutexPath, char *fullPath, char *shmPath, int shmSize){
+
     //basically we do a similar process that in the init but without creation flags
     sharedData shared_data= malloc(sizeof(struct sharedDataCDT));
     shared_data->mutexPath=mutexPath;
@@ -92,25 +94,25 @@ sharedData openData(char *mutexPath, char *fullPath, char *shmPath, int shmSize)
         printf("fallo el primer sem open de open data\n");
 
     }
-    shared_data->fullSem = sem_open(fullPath, 0, 0660, 1  );
+    shared_data->fullSem = sem_open(fullPath, 0, 0660, 0  );
     if(shared_data->fullSem==SEM_FAILED){
-        printf("fallo el segundo sem open de open data fullpath= %s\n",fullPath);
+        printf("fallo el segundo sem open de open data fullpath = %s\n",fullPath);
         //error handler
     }
     //shm open with creation flags 
-    shared_data->shmFd=shm_open(shared_data->shmPath, O_RDWR | O_EXCL, S_IWUSR | S_IRUSR );
+    shared_data->shmFd=shm_open(shared_data->shmPath, O_RDWR | O_EXCL, 1);//not necessary to specify permits
 
-    if(shared_data->shmFd<0){
+    if(shared_data->shmFd==-1){
         printf("fallo el primer y unico shm open de open data\n");
         //error handler
 
     }
 
-    if(ftruncate(shared_data->shmFd,shmSize+ sizeof(long))<0){
+    if(ftruncate(shared_data->shmFd,SIZE_TEMPORAL_DESPUES_BORRAR)==-1){
         //error handler
         printf("fallo el truncate de open data\n");
     }
-    char *shmBase =mmap(NULL, shared_data->shmSize + sizeof(long), PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
+    char *shmBase =mmap(NULL, SIZE_TEMPORAL_DESPUES_BORRAR, PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
     //(mmap returns a pointer to a block of memory, in this case shmbase is pointing at that block of memory)
     if(shmBase == MAP_FAILED){
         //error handler

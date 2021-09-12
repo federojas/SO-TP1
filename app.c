@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>
+#include <string.h>
 #include "sharedData.h"
 #include <semaphore.h>
 
@@ -78,62 +79,77 @@ int main(int argc, char const *argv[])
     fd_set read_set, ready_set;
 
     //initialize all shared data that will be used
-    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
+    //sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE );
+    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH,SIZE_TEMPORAL_DESPUES_BORRAR );
     sem_t *mutexSem=getMutexSem(shared_data);
     sem_t *fullSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     //------------------PRUEBAS A VER SI ANDA SHM DESPUES SACAR---------------------------------------
     int i=0;
+    // char auxBuf[]="hola";
+    // memcpy(shmBase,auxBuf, sizeof(auxBuf));
+    int index=0;
+    
+    memcpy(shmBase+index, "chau ", sizeof("chau "));
+    memcpy(shmBase+index, "chau  chau", sizeof("chau "));
+
     while(i<10){
         i++;
+        sleep(1);
         sem_wait(mutexSem);
-                        sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
-                        //sprintf(shmBase,"%s\n", "hola");                    
-                        (*(long *)shmBase)++;
+            printf("dentro del semaforo\n");
+            memcpy(shmBase+index, "chau ", sizeof("chau "));
+            index+=sizeof("chau ");
+            //sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", "hola");
+            //sprintf(shmBase,"%s\n", "hola");                    
+            //(*(long *)shmBase)++;
 
-                    sem_post(mutexSem);
-                    sem_post(fullSem);
+        sem_post(mutexSem);
+        sem_post(fullSem);
     }
-    unlinkData(shared_data);
-    while(solved_tasks < total_tasks) {
-            //select is destructive
-            ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
-        
-        build_read_set(pipes, &read_set, childs_count);
+    //unlinkData(shared_data); BORRA EL FILE CREADO 
 
-        if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
-            error_handler("select");
-        }
-        
-        for(int i = 0; i < childs_count; i++) {
-            if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
-                int read_return;
-                char read_output[MAX_READ_OUTPUT_SIZE + 1];
-                read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
-                if(read_return == -1) {
-                    error_handler("read");
-                } else if(read_return != 0) {
-                    read_output[read_return] = 0;
 
-                    //printf("%s\n", read_output);
+
+    // while(solved_tasks < total_tasks) {
+    //         //select is destructive
+    //         ready_set=read_set; //OJO ESTO TODAVIA NO HACE NADA
+        
+    //     build_read_set(pipes, &read_set, childs_count);
+
+    //     if (select(highest_ctp_read_fd + 1, &read_set, NULL, NULL, NULL) == -1 ) {
+    //         error_handler("select");
+    //     }
+        
+    //     for(int i = 0; i < childs_count; i++) {
+    //         if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
+    //             int read_return;
+    //             char read_output[MAX_READ_OUTPUT_SIZE + 1];
+    //             read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
+    //             if(read_return == -1) {
+    //                 error_handler("read");
+    //             } else if(read_return != 0) {
+    //                 read_output[read_return] = 0;
+
+    //                 //printf("%s\n", read_output);
                     
-                    //assign a signle new task to the current child
-                    if (current_task_idx < total_tasks)
-                        send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-                    solved_tasks++;
-                }
-            }
-        }
-    }
+    //                 //assign a signle new task to the current child
+    //                 if (current_task_idx < total_tasks)
+    //                     send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+    //                 solved_tasks++;
+    //             }
+    //         }
+    //     }
+    // }
     
                               
-    //close remaining fd
-    for(int i = 0; i < childs_count; i++) {
-        if(close(pipes[i].child_to_parent[0]) == -1)
-            error_handler("Closing ctpr FD");
-        if(close(pipes[i].parent_to_child[1]) == -1)
-            error_handler("Closing ptcw FD");
-    }
+    // //close remaining fd
+    // for(int i = 0; i < childs_count; i++) {
+    //     if(close(pipes[i].child_to_parent[0]) == -1)
+    //         error_handler("Closing ctpr FD");
+    //     if(close(pipes[i].parent_to_child[1]) == -1)
+    //         error_handler("Closing ptcw FD");
+    // }
     return 0;
 }
 

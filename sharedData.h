@@ -3,7 +3,7 @@
 #define SHM_PATH "/shm_buff"
 #define SEM_MUTEX "/sem_mutex"
 #define SEM_FULL "/sem_full"
-
+#define SIZE_TEMPORAL_DESPUES_BORRAR 200
 #include <semaphore.h>
 #include <sys/shm.h>
 #include <stdlib.h>
