@@ -19,18 +19,6 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
 
     //-------------------------------------
 
-    //---------------------------SHM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
-    //shm open with creation flags 
-    shared_data->shmFd=shm_open(shared_data->shmPath, O_CREAT | O_RDWR ,00660 );
-    if(shared_data->shmFd==-1){
-        error_handler("shm_open");
-    }
-    //puede que aca vaya shmSize+sizeof long o puede que no REVISAR ESTO
-    //if(ftruncate(shared_data->shmFd,shmSize+ sizeof(long))==-1){
-    if(ftruncate(shared_data->shmFd,SIZE_TEMPORAL_DESPUES_BORRAR)==-1){
-        error_handler("ftruncate");
-    }
-
     //--------------------------SEM OPENS (with creation flag)----------------------------------------------------------------------------------------------------
     shared_data->mutexSem = sem_open(mutexPath, O_CREAT |  O_EXCL , 0660, 1 );
     if(shared_data->mutexSem==SEM_FAILED){
@@ -40,8 +28,19 @@ sharedData initSharedData(char *mutexPath, char *fullPath, char *shmPath, int sh
     if(shared_data->fullSem==SEM_FAILED){
         error_handler("sem_open");
     }
+    //---------------------------SHM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
+    //shm open with creation flags 
+    shared_data->shmFd=shm_open(shared_data->shmPath, O_CREAT | O_RDWR ,S_IWUSR | S_IRUSR );
+    if(shared_data->shmFd==-1){
+        error_handler("shm_open");
+    }
+   
+    if(ftruncate(shared_data->shmFd,shmSize+sizeof(long))==-1){
+        error_handler("ftruncate");
+    }
+
     //-------------------------------------MAPPING----------------------------------------------------------------------------------------------------------------
-    char *shmBase =mmap(NULL, SIZE_TEMPORAL_DESPUES_BORRAR, PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
+    char *shmBase =mmap(NULL, shmSize+sizeof(long), PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
     //(mmap returns a pointer to a block of memory, in this case shmbase is pointing at that block of memory)
     if(shmBase == MAP_FAILED){
         error_handler("mmap");
@@ -79,6 +78,7 @@ sharedData openData(char *mutexPath, char *fullPath, char *shmPath, int shmSize)
     shared_data->fullPath=fullPath;
     shared_data->shmPath=shmPath;
     shared_data->shmSize=shmSize;
+
     shared_data->mutexSem = sem_open(mutexPath, 0, 0660, 1);
     if(shared_data->mutexSem == SEM_FAILED){
         error_handler("sem_open");
@@ -88,16 +88,13 @@ sharedData openData(char *mutexPath, char *fullPath, char *shmPath, int shmSize)
         error_handler("sem_open");
     }
     //shm open with creation flags 
-    shared_data->shmFd=shm_open(shared_data->shmPath, O_RDWR | O_EXCL, 1);//not necessary to specify permits
+    shared_data->shmFd=shm_open(shared_data->shmPath, O_RDWR ,S_IWUSR | S_IRUSR);//not necessary to specify permits
 
     if(shared_data->shmFd==-1){
         error_handler("shm_open");
     }
 
-    if(ftruncate(shared_data->shmFd,SIZE_TEMPORAL_DESPUES_BORRAR)==-1){
-        error_handler("ftruncate");
-    }
-    char *shmBase =mmap(NULL, SIZE_TEMPORAL_DESPUES_BORRAR, PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
+    char *shmBase =mmap(NULL, shmSize+sizeof(long), PROT_READ | PROT_WRITE, MAP_SHARED, shared_data->shmFd, 0);
     //(mmap returns a pointer to a block of memory, in this case shmbase is pointing at that block of memory)
     if(shmBase == MAP_FAILED){
         error_handler("mmap");

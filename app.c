@@ -61,11 +61,11 @@ int main(int argc, char const *argv[]) {
     //initialize all shared memory that will be used
     sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL,SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
     sem_t *mutexSem=getMutexSem(shared_data);
-    sem_t *fullSem=getMutexSem(shared_data);
+    sem_t *fullSem=getFullSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
-    printf("%d", total_tasks);
     sleep(5);
+    printf("%d", total_tasks);
 
     //initialize childs
     int childs_count = CALCULATE_CHILDS_COUNT(total_tasks);

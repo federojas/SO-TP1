@@ -1,0 +1,2 @@
+PID: 16946 Filename: 2.cnf Number of variables: 1359 Number of clauses: 3238 CPU time: 0.007610s UNSATISFIABLE
+PID: 16945 Filename: 1.cnf Number of variables: 0 Number of clauses: 0 CPU time: 0.000000s 
