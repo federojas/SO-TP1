@@ -13,7 +13,7 @@ shared_data_ADT open_data(char *mutexPath, char *shmPath, int shmSize);
 void close_data(shared_data_ADT data);
 void unlink_data(shared_data_ADT data);
 int shm_writer(char *buff, char *shmBase);
-sem_t *getMutexSem(shared_data_ADT data);
-char *getShmBase(shared_data_ADT data);
+sem_t *get_mutex_sem(shared_data_ADT data);
+char *get_shm_ptr(shared_data_ADT data);
 
 #endif 

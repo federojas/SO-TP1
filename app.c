@@ -21,6 +21,9 @@ void close_pipes(t_child child);
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx);
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
 void send_task(t_child pipe, char * const* tasks, int * current_task_idx);
+void initialize_shared_memory(shared_data_ADT * shared_data, sem_t ** mutex_sem, char ** shm_ptr, int total_tasks);
+void send_initial_tasks(t_child * pipes, char * const* tasks, int childs_count, int initial_tasks_per_child, int * current_task_idx);
+void free_childs(t_child * pipes, int childs_count);
 
 const char* slave_file_name = "./slave"; //insert slave file name
 const char* answers_file_name = "answers.txt"; //insert answers file name
@@ -50,34 +53,24 @@ int main(int argc, char const *argv[]) {
         error_handler("fopen");
     }
 
-    //initialize all shared memory that will be used
-    shared_data_ADT shared_data=init_shared_data(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
-    sem_t *mutexSem=getMutexSem(shared_data);
-    char *shmBase=getShmBase(shared_data);
+    shared_data_ADT shared_data = NULL;
+    char * shm_ptr = NULL;
+    sem_t * mutex_sem = NULL;
+
+    initialize_shared_memory(&shared_data, &mutex_sem, &shm_ptr, total_tasks);
     
     sleep(2);
     printf("%d", total_tasks);
 
-    //initialize childs
     int childs_count = CALCULATE_CHILDS_COUNT(total_tasks);
-
     t_child pipes[childs_count];
 
     int highest_ctp_read_fd = -1;
     initialize_pipes(pipes, childs_count, &highest_ctp_read_fd);
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
     
-
-    //send initial tasks
     int initial_tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
-
-    for(int i = 0; i < childs_count; i++) {
-        for(int j = 0; j < initial_tasks_per_child; j++) {
-            send_task(pipes[i], (char * const*)tasks, &current_task_idx);
-            if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
-                error_handler("write");
-        }
-    }
+    send_initial_tasks(pipes, (char * const*)tasks, childs_count, initial_tasks_per_child, &current_task_idx);
 
     int offset=0;
     while(solved_tasks < total_tasks) {
@@ -101,8 +94,8 @@ int main(int argc, char const *argv[]) {
                     char * answer = strtok(read_output, "\n");
                     while(answer != NULL) {
 
-                        offset+=shm_writer(answer,shmBase+offset);
-                        if(sem_post(mutexSem) == -1) {
+                        offset += shm_writer(answer, shm_ptr + offset);
+                        if(sem_post(mutex_sem) == -1) {
                             error_handler("sem_post");
                         }
 
@@ -127,20 +120,8 @@ int main(int argc, char const *argv[]) {
     }
     if(fclose(solve_file) == EOF)
         error_handler("fclose");
-
-    //close remaining fd
-    for(int i = 0; i < childs_count; i++) {
-        if(close(pipes[i].child_to_parent[0]) == -1)
-            error_handler("Closing ctpr FD");
-        if(close(pipes[i].parent_to_child[1]) == -1)
-            error_handler("Closing ptcw FD");
-        kill(pipes[i].pid, SIGKILL);
-        if(waitpid(pipes[i].pid, NULL, 0) == -1)
-            error_handler("wait");
-    }
-   
+    free_childs(pipes, childs_count);
     close_data(shared_data);
-  
     return 0;
 }
 
@@ -220,3 +201,30 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
 
 }
 
+void initialize_shared_memory(shared_data_ADT * shared_data, sem_t ** mutex_sem, char ** shm_ptr, int total_tasks) {
+    *shared_data = init_shared_data(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
+    *mutex_sem=get_mutex_sem(*shared_data);
+    *shm_ptr=get_shm_ptr(*shared_data);
+}
+    
+void send_initial_tasks(t_child * pipes, char * const* tasks, int childs_count, int initial_tasks_per_child, int * current_task_idx) {
+    for(int i = 0; i < childs_count; i++) {
+        for(int j = 0; j < initial_tasks_per_child; j++) {
+            send_task(pipes[i], (char * const*)tasks, current_task_idx);
+            if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
+                error_handler("write");
+        }
+    }
+}
+
+void free_childs(t_child * pipes, int childs_count) {
+    for(int i = 0; i < childs_count; i++) {
+        if(close(pipes[i].child_to_parent[0]) == -1)
+            error_handler("Closing ctpr FD");
+        if(close(pipes[i].parent_to_child[1]) == -1)
+            error_handler("Closing ptcw FD");
+        kill(pipes[i].pid, SIGKILL);
+        if(waitpid(pipes[i].pid, NULL, 0) == -1)
+            error_handler("wait");
+    }  
+}

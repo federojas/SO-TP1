@@ -21,15 +21,15 @@ int main(int argc, char *argv[]) {
 
     shared_data_ADT shared_data = open_data(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
-    sem_t *mutexSem=getMutexSem(shared_data);
-    char *shmBase=getShmBase(shared_data);   
+    sem_t *mutex_sem = get_mutex_sem(shared_data);
+    char *shm_ptr = get_shm_ptr(shared_data);   
     int i = 0;
     int offset=0;
     while (i <= task_count) {
-        if(sem_wait(mutexSem) == -1) {
+        if(sem_wait(mutex_sem) == -1) {
             error_handler("sem_wait");
         }
-        offset+=printf("%s",shmBase+offset);
+        offset += printf("%s", shm_ptr + offset);
         i++;
     }
     

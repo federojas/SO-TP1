@@ -105,9 +105,9 @@ void close_data(shared_data_ADT data){
     }
     free(data);  
 }
-sem_t *getMutexSem(shared_data_ADT data){
+sem_t *get_mutex_sem(shared_data_ADT data){
     return data->mutexSem;
 }
-char *getShmBase(shared_data_ADT data){
+char *get_shm_ptr(shared_data_ADT data){
     return data->shmBase;
 }
