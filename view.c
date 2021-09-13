@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
         i++;
     }
     
-    closeData(shared_data);
+    unlinkData(shared_data);
     return 0;
 }
     

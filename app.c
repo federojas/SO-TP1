@@ -157,7 +157,7 @@ int main(int argc, char const *argv[]) {
             error_handler("wait");
     }
    
-    //unlinkData(shared_data);
+    closeData(shared_data);
   
     return 0;
 }
