@@ -1,3 +1,5 @@
+#define _XOPEN_SOURCE 500
+
 #include <sys/shm.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
     sharedData shared_data = openData(SEM_MUTEX, SEM_FULL,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
     sem_t *mutexSem=getMutexSem(shared_data);
-    sem_t *fullSem=getMutexSem(shared_data);
+    sem_t *fullSem=getFullSem(shared_data);
     char *shmBase=getShmBase(shared_data);   
     
     int i = 0;

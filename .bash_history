@@ -25,3 +25,10 @@ exit
 cd
 exit
 exit
+cd /dev
+ls
+cd shm
+rm *
+ls
+cd
+exit
