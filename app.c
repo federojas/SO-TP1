@@ -59,14 +59,14 @@ int main(int argc, char const *argv[]) {
     char const **tasks = argv + 1;
 
     FILE * solve_file = fopen(answers_file_name, "w");
+    //printf("%d\n",fileno(solve_file));
     if (solve_file == NULL) {
         error_handler("fopen");
     }
 
     //initialize all shared memory that will be used
-    sharedData shared_data=initSharedData(SEM_MUTEX, SEM_FULL, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
+    sharedData shared_data=initSharedData(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
     sem_t *mutexSem=getMutexSem(shared_data);
-    sem_t *fullSem=getFullSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
     sleep(5);
@@ -90,7 +90,7 @@ int main(int argc, char const *argv[]) {
             send_task(pipes[i], (char * const*)tasks, &current_task_idx);
         }
     }
-
+    int offset=0;
     while(solved_tasks < total_tasks) {
         fd_set read_set;
         build_read_set(pipes, &read_set, childs_count);
@@ -113,23 +113,20 @@ int main(int argc, char const *argv[]) {
                     while(answer != NULL) {
 
                         //assign a single new task to the current child
-                        if (current_task_idx < total_tasks)
+                        if(current_task_idx < total_tasks){
                             send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-
-                        //shared memory
-                        if(sem_wait(mutexSem) == -1) {
-                            error_handler("sem_wait");
                         }
-                        sprintf(shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE, "%s\n", answer);
-                        (*(long *)shmBase)++;
+
+                        offset+=shm_writer(answer,shmBase+offset);
                         if(sem_post(mutexSem) == -1) {
                             error_handler("sem_post");
                         }
-                        if(sem_post(fullSem) == -1) {
-                            error_handler("sem_post");
-                        }
 
-                        fprintf(solve_file, "%s\n", answer);
+
+                        if(fprintf(solve_file, "%s\n", answer)<0){
+                            printf("fallo esto capo");
+                            exit(1);
+                        }
 
                         answer = strtok(NULL, "\n");
         
@@ -140,7 +137,7 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    unlinkData(shared_data);
+    //unlinkData(shared_data);
     fclose(solve_file);
 
     //close remaining fd

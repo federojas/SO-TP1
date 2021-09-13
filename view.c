@@ -15,8 +15,8 @@
 #define MAX_READ_OUTPUT_SIZE 4096
 
 int main(int argc, char *argv[]) {
-    sleep(2);
     int task_count = 0;
+
     if (argc > 2) {
         fprintf(stderr, "Usage: %s <task_count>\n", argv[0]);
         exit(EXIT_FAILURE);
@@ -28,21 +28,17 @@ int main(int argc, char *argv[]) {
         scanf("%10d", &task_count);
     }
 
-    sharedData shared_data = openData(SEM_MUTEX, SEM_FULL,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
+    sharedData shared_data = openData(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
     sem_t *mutexSem=getMutexSem(shared_data);
-    sem_t *fullSem=getFullSem(shared_data);
     char *shmBase=getShmBase(shared_data);   
-    
     int i = 0;
-    
+    int offset=0;
     while (i < task_count)
     {
-        sem_wait(fullSem);
+      
         sem_wait(mutexSem);
-        (*(long *)shmBase)--;
-        printf("%s", shmBase + sizeof(long) + (*(long *)shmBase) * MAX_READ_OUTPUT_SIZE);
-        sem_post(mutexSem);
+        offset+=printf("%s",shmBase+offset);
         i++;
     }
     
