@@ -42,3 +42,19 @@ make all
 ./view 29
 ./view 29
 ./view 29
+make all
+./app 1.cnf | ./view
+apt-get install minisat
+./app 1.cnf | ./view
+./app *.cnf | ./view
+./app *.cnf
+./app *.cnf
+./view 29
+./app *.cnf
+./view 29
+./view 29
+./view 29
+./view 29
+lsof
+exit
+exit
