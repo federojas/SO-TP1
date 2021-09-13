@@ -1,0 +1,88 @@
+set_robust_list(0x7f24b0139a20, 24)     = 0
+dup2(14, 1)                             = 1
+dup2(15, 0)                             = 0
+close(15)                               = 0
+close(16)                               = 0
+close(13)                               = 0
+close(14)                               = 0
+execve("./slave", NULL, 0x7ffcb1121820 /* 24 vars */) = 0
+brk(NULL)                               = 0x559871f68000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 4
+fstat(4, {st_mode=S_IFREG|0644, st_size=59106, ...}) = 0
+mmap(NULL, 59106, PROT_READ, MAP_PRIVATE, 4, 0) = 0x7fe5b73af000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\"\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=31680, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fe5b73ad000
+mmap(NULL, 2128864, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7fe5b6f8d000
+mprotect(0x7fe5b6f94000, 2093056, PROT_NONE) = 0
+mmap(0x7fe5b7193000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x6000) = 0x7fe5b7193000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0000b\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0755, st_size=144976, ...}) = 0
+mmap(NULL, 2221184, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7fe5b6d6e000
+mprotect(0x7fe5b6d88000, 2093056, PROT_NONE) = 0
+mmap(0x7fe5b6f87000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x19000) = 0x7fe5b6f87000
+mmap(0x7fe5b6f89000, 13440, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fe5b6f89000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\20\35\2\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0755, st_size=2030928, ...}) = 0
+mmap(NULL, 4131552, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7fe5b697d000
+mprotect(0x7fe5b6b64000, 2097152, PROT_NONE) = 0
+mmap(0x7fe5b6d64000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x1e7000) = 0x7fe5b6d64000
+mmap(0x7fe5b6d6a000, 15072, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fe5b6d6a000
+close(4)                                = 0
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fe5b73aa000
+arch_prctl(ARCH_SET_FS, 0x7fe5b73aa740) = 0
+mprotect(0x7fe5b6d64000, 16384, PROT_READ) = 0
+mprotect(0x7fe5b6f87000, 4096, PROT_READ) = 0
+mprotect(0x7fe5b7193000, 4096, PROT_READ) = 0
+mprotect(0x559871d29000, 4096, PROT_READ) = 0
+mprotect(0x7fe5b73be000, 4096, PROT_READ) = 0
+munmap(0x7fe5b73af000, 59106)           = 0
+set_tid_address(0x7fe5b73aaa10)         = 2644
+set_robust_list(0x7fe5b73aaa20, 24)     = 0
+rt_sigaction(SIGRTMIN, {sa_handler=0x7fe5b6d73cb0, sa_mask=[], sa_flags=SA_RESTORER|SA_SIGINFO, sa_restorer=0x7fe5b6d80980}, NULL, 8) = 0
+rt_sigaction(SIGRT_1, {sa_handler=0x7fe5b6d73d50, sa_mask=[], sa_flags=SA_RESTORER|SA_RESTART|SA_SIGINFO, sa_restorer=0x7fe5b6d80980}, NULL, 8) = 0
+rt_sigprocmask(SIG_UNBLOCK, [RTMIN RT_1], NULL, 8) = 0
+prlimit64(0, RLIMIT_STACK, NULL, {rlim_cur=8192*1024, rlim_max=RLIM64_INFINITY}) = 0
+brk(NULL)                               = 0x559871f68000
+brk(0x559871f89000)                     = 0x559871f89000
+fstat(0, {st_mode=S_IFIFO|0600, st_size=0, ...}) = 0
+read(0, "15.cnf\n16.cnf\n17.cnf\n", 4096) = 21
+pipe2([4, 6], O_CLOEXEC)                = 0
+clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7fe5b73aaa10) = 2658
+--- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=2658, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+close(6)                                = 0
+fcntl(4, F_SETFD, 0)                    = 0
+fstat(4, {st_mode=S_IFIFO|0600, st_size=0, ...}) = 0
+read(4, "Numberofvariables:50Numberofclau"..., 4096) = 59
+read(4, "", 4096)                       = 0
+close(4)                                = 0
+wait4(2658, [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 2658
+getpid()                                = 2644
+write(1, "PID: 2644 Filename: 15.cnf Numbe"..., 104) = 104
+pipe2([4, 6], O_CLOEXEC)                = 0
+clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7fe5b73aaa10) = 2667
+close(6)                                = 0
+--- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=2667, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+fcntl(4, F_SETFD, 0)                    = 0
+fstat(4, {st_mode=S_IFIFO|0600, st_size=0, ...}) = 0
+read(4, "Numberofvariables:50Numberofclau"..., 4096) = 66
+read(4, "", 4096)                       = 0
+close(4)                                = 0
+wait4(2667, [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 2667
+getpid()                                = 2644
+write(1, "PID: 2644 Filename: 16.cnf Numbe"..., 104) = 104
+pipe2([4, 6], O_CLOEXEC)                = 0
+clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7fe5b73aaa10) = 2747
+--- SIGINT {si_signo=SIGINT, si_code=SI_KERNEL} ---
++++ killed by SIGINT +++

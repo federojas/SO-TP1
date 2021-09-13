@@ -58,3 +58,15 @@ apt-get install minisat
 lsof
 exit
 exit
+./app *.cnf | ./view
+apt-get install minisat
+./app *.cnf | ./view
+docker ps
+./app *.cnf
+cat answers.txt
+rm answers.txt
+ls
+./app *.cnf | ./view
+cat answers.txt
+exit
+exit

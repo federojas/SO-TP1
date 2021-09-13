@@ -1,0 +1,101 @@
+close(4)                                = 0
+dup2(6, 1)                              = 1
+close(6)                                = 0
+execve("/usr/bin/minisat", ["minisat", "21.cnf"], 0x564ad8437b28 /* 24 vars */) = 0
+brk(NULL)                               = 0x55c4770f2000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 4
+fstat(4, {st_mode=S_IFREG|0644, st_size=59106, ...}) = 0
+mmap(NULL, 59106, PROT_READ, MAP_PRIVATE, 4, 0) = 0x7f66930e7000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/lib/libminisat.so.2", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0`6\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=76128, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f66930e5000
+mmap(NULL, 2172568, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f6692cba000
+mprotect(0x7f6692ccc000, 2093056, PROT_NONE) = 0
+mmap(0x7f6692ecb000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x11000) = 0x7f6692ecb000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libz.so.1", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\220\37\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=116960, ...}) = 0
+mmap(NULL, 2212016, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f6692a9d000
+mprotect(0x7f6692ab9000, 2093056, PROT_NONE) = 0
+mmap(0x7f6692cb8000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x1b000) = 0x7f6692cb8000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\20\233\t\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=1903624, ...}) = 0
+mmap(NULL, 4012032, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f66926c9000
+mprotect(0x7f669288c000, 2097152, PROT_NONE) = 0
+mmap(0x7f6692a8c000, 57344, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x1c3000) = 0x7f6692a8c000
+mmap(0x7f6692a9a000, 10240, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f6692a9a000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0000+\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=96640, ...}) = 0
+mmap(NULL, 2192464, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f66924b1000
+mprotect(0x7f66924c8000, 2093056, PROT_NONE) = 0
+mmap(0x7f66926c7000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x16000) = 0x7f66926c7000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\20\35\2\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0755, st_size=2030928, ...}) = 0
+mmap(NULL, 4131552, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f66920c0000
+mprotect(0x7f66922a7000, 2097152, PROT_NONE) = 0
+mmap(0x7f66924a7000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x1e7000) = 0x7f66924a7000
+mmap(0x7f66924ad000, 15072, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f66924ad000
+close(4)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 4
+read(4, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\200\272\0\0\0\0\0\0"..., 832) = 832
+fstat(4, {st_mode=S_IFREG|0644, st_size=1700792, ...}) = 0
+mmap(NULL, 3789144, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 4, 0) = 0x7f6691d22000
+mprotect(0x7f6691ebf000, 2093056, PROT_NONE) = 0
+mmap(0x7f66920be000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 4, 0x19c000) = 0x7f66920be000
+close(4)                                = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f66930e3000
+mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f66930e0000
+arch_prctl(ARCH_SET_FS, 0x7f66930e0740) = 0
+mprotect(0x7f66924a7000, 16384, PROT_READ) = 0
+mprotect(0x7f66920be000, 4096, PROT_READ) = 0
+mprotect(0x7f66926c7000, 4096, PROT_READ) = 0
+mprotect(0x7f6692a8c000, 45056, PROT_READ) = 0
+mprotect(0x7f6692cb8000, 4096, PROT_READ) = 0
+mprotect(0x7f6692ecb000, 4096, PROT_READ) = 0
+mprotect(0x55c4756f1000, 4096, PROT_READ) = 0
+mprotect(0x7f66930f6000, 4096, PROT_READ) = 0
+munmap(0x7f66930e7000, 59106)           = 0
+brk(NULL)                               = 0x55c4770f2000
+brk(0x55c477113000)                     = 0x55c477113000
+fstat(1, {st_mode=S_IFIFO|0600, st_size=0, ...}) = 0
+mmap(NULL, 4460544, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f66918e1000
+getrusage(RUSAGE_SELF, {ru_utime={tv_sec=0, tv_usec=12827}, ru_stime={tv_sec=0, tv_usec=0}, ...}) = 0
+rt_sigaction(SIGINT, {sa_handler=0x55c4754ef180, sa_mask=[INT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+rt_sigaction(SIGXCPU, {sa_handler=0x55c4754ef180, sa_mask=[XCPU], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, {sa_handler=SIG_DFL, sa_mask=[], sa_flags=0}, 8) = 0
+openat(AT_FDCWD, "21.cnf", O_RDONLY)    = 4
+lseek(4, 0, SEEK_CUR)                   = 0
+read(4, "c\nc SAT instance in DIMACS CNF i"..., 8192) = 6231
+read(4, "", 1961)                       = 0
+brk(0x55c477134000)                     = 0x55c477134000
+close(4)                                = 0
+getrusage(RUSAGE_SELF, {ru_utime={tv_sec=0, tv_usec=15384}, ru_stime={tv_sec=0, tv_usec=0}, ...}) = 0
+rt_sigaction(SIGINT, {sa_handler=0x55c4754eec20, sa_mask=[INT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, {sa_handler=0x55c4754ef180, sa_mask=[INT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, 8) = 0
+rt_sigaction(SIGXCPU, {sa_handler=0x55c4754eec20, sa_mask=[XCPU], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, {sa_handler=0x55c4754ef180, sa_mask=[XCPU], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7f66920ff040}, 8) = 0
+munmap(0x7f66918e1000, 4460544)         = 0
+getrusage(RUSAGE_SELF, {ru_utime={tv_sec=0, tv_usec=16377}, ru_stime={tv_sec=0, tv_usec=0}, ...}) = 0
+getrusage(RUSAGE_SELF, {ru_utime={tv_sec=0, tv_usec=17431}, ru_stime={tv_sec=0, tv_usec=0}, ...}) = 0
+getpid()                                = 2659
+openat(AT_FDCWD, "/proc/2659/status", O_RDONLY) = 4
+fstat(4, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+read(4, "Name:\tminisat\nUmask:\t0022\nState:"..., 1024) = 1024
+close(4)                                = 0
+write(1, "WARNING: for repeatability, sett"..., 1439) = 1439
+exit_group(10)                          = ?
++++ exited with 10 +++

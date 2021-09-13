@@ -1,0 +1,6 @@
+set_robust_list(0x7f24b0139a20, 24)     = 0
+dup2(6, 1)                              = 1
+dup2(7, 0)                              = 0
+close(7)                                = 0
+--- SIGINT {si_signo=SIGINT, si_code=SI_KERNEL} ---
++++ killed by SIGINT +++

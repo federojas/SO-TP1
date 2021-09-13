@@ -16,7 +16,7 @@ typedef struct {
 } t_child;
 
 void initialize_pipes(t_child pipes[], int childs_count, int * highest_ctp_read_fd);
-void close_pipes(t_child child);
+void close_pipes(t_child * childs, int childs_count);
 void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx);
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count);
 void send_task(t_child pipe, char * const* tasks, int * current_task_idx);
@@ -140,7 +140,7 @@ void build_read_set(t_child pipes[], fd_set * read_set, int childs_count) {
     }
 }
 
-void initialize_pipes(t_child pipes[], int childs_count, int * highest_ctp_read_fd) { 
+void initialize_pipes(t_child * pipes, int childs_count, int * highest_ctp_read_fd) { 
     for (int i = 0; i < childs_count; i++) {
             if (pipe(pipes[i].child_to_parent) == -1) {
                 error_handler("Pipe ctp");
@@ -156,19 +156,17 @@ void initialize_pipes(t_child pipes[], int childs_count, int * highest_ctp_read_
     return;
 }
 
-void close_pipes(t_child child){
-    if(close(child.parent_to_child[0]) == -1)
-        error_handler("Closing ptcr FD");
-    if(close(child.parent_to_child[1]) == -1)
-        error_handler("Closing ptcw FD");
-    if(close(child.child_to_parent[0]) == -1)
-        error_handler("Closing ctpr FD");
-    if(close(child.child_to_parent[1]) == -1)
-        error_handler("Closing ctpw FD");
+void close_pipes(t_child * childs, int childs_count){
+    for(int i = 0; i < childs_count; i++) {
+        close(childs[i].parent_to_child[0]);
+        close(childs[i].parent_to_child[1]);
+        close(childs[i].child_to_parent[0]);
+        close(childs[i].child_to_parent[1]);
+    } 
 }
 
 
-void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char * const* tasks, int * current_task_idx) {
+void initialize_forks(t_child * pipes, int childs_count, int total_tasks, char * const* tasks, int * current_task_idx) {
     
     char *const *execv_parameter = NULL;
     
@@ -183,7 +181,7 @@ void initialize_forks(t_child pipes[], int childs_count, int total_tasks, char *
                 error_handler("dup2 ctpw");
             if(dup2(pipes[i].parent_to_child[0], STDIN) == -1)
                 error_handler("dup2 ptcr");
-            close_pipes(pipes[i]);
+            close_pipes(pipes, childs_count);
             if (execv(slave_file_name, execv_parameter) == -1) {
                 perror("execv");  
             }
@@ -222,7 +220,6 @@ void free_childs(t_child * pipes, int childs_count) {
             error_handler("Closing ctpr FD");
         if(close(pipes[i].parent_to_child[1]) == -1)
             error_handler("Closing ptcw FD");
-        kill(pipes[i].pid, SIGKILL);
         if(waitpid(pipes[i].pid, NULL, 0) == -1)
             error_handler("wait");
     }  

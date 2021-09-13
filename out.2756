@@ -1,0 +1,9 @@
+rt_sigprocmask(SIG_SETMASK, [], [], 8)  = 0
+rt_sigaction(SIGINT, {sa_handler=SIG_DFL, sa_mask=[INT], sa_flags=SA_RESTORER|SA_RESTART, sa_restorer=0x7ff2069b2040}, {sa_handler=0x559965a71200, sa_mask=~[KILL STOP RTMIN RT_1], sa_flags=SA_RESTORER, sa_restorer=0x7ff2069b2040}, 8) = 0
+rt_sigprocmask(SIG_BLOCK, ~[RTMIN RT_1], [], 8) = 0
+getpid()                                = 2756
+gettid()                                = 2756
+tgkill(2756, 2756, SIGINT)              = 0
+rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0
+--- SIGINT {si_signo=SIGINT, si_code=SI_TKILL, si_pid=2756, si_uid=1000} ---
++++ killed by SIGINT +++

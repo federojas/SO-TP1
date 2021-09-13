@@ -5,8 +5,7 @@
 
 void solve(char *line);
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     //desactivamos buffer
     int check = setvbuf(stdout, NULL, _IONBF, 0);
     if(check != 0) {
@@ -16,18 +15,22 @@ int main(int argc, char const *argv[])
     char *file = NULL;
     size_t len = 0;
 
-    while ((getline(&file, &len, stdin)) > 0) {
+    while (getline(&file, &len, stdin) != -1) {
         file[strcspn(file, "\n")] = 0;
         solve(file);
     }
 
+    FILE * hola = fopen("hola.txt", "w");
+    fprintf(hola, "llegue\n");
+    fclose(hola);
+
+
     free(file);
 
     return 0;
-
 }
 
-void solve(char *file){
+void solve(char *file) {
     char result[MAX_READ_OUTPUT_SIZE]; 
     char minisat_output[MAX_READ_OUTPUT_SIZE];
     
