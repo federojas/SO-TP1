@@ -32,3 +32,13 @@ rm *
 ls
 cd
 exit
+exit
+minisat
+apt-get install minisat
+dcom make all
+make all
+./view 29
+./view 29
+./view 29
+./view 29
+./view 29
