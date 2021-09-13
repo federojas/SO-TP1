@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #define _XOPEN_SOURCE 500
 
 #include "sharedData.h"
@@ -34,7 +36,7 @@ sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
 
     //---------------------------SHM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
     //shm open with creation flags 
-    shared_data->shmFd=shm_open(shared_data->shmPath,  O_CREAT | O_RDWR  , 00700 );
+    shared_data->shmFd=shm_open(shmPath, O_CREAT | O_RDWR | O_EXCL, S_IWUSR | S_IRUSR );
     if(shared_data->shmFd==-1){
         error_handler("shm_open");
     }
