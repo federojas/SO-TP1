@@ -20,11 +20,6 @@ int main(int argc, char const *argv[]) {
         solve(file);
     }
 
-    FILE * hola = fopen("hola.txt", "w");
-    fprintf(hola, "llegue\n");
-    fclose(hola);
-
-
     free(file);
 
     return 0;
