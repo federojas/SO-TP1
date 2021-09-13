@@ -90,8 +90,11 @@ int main(int argc, char const *argv[]) {
     for(int i = 0; i < childs_count; i++) {
         for(int j = 0; j < initial_tasks_per_child; j++) {
             send_task(pipes[i], (char * const*)tasks, &current_task_idx);
+            if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
+                error_handler("write");
         }
     }
+
     int offset=0;
     while(solved_tasks < total_tasks) {
         fd_set read_set;
@@ -123,7 +126,7 @@ int main(int argc, char const *argv[]) {
                         if(fprintf(solve_file, "%s\n", answer)<0){
                             error_handler("fprintf");
                         }
-
+                        
                         answer = strtok(NULL, "\n");
         
                         solved_tasks++;
@@ -131,12 +134,13 @@ int main(int argc, char const *argv[]) {
                         //assign a single new task to the current child
                         if(current_task_idx < total_tasks){
                             send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+                            if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
+                                error_handler("write");
                         }
                 }
             }
         }
     }
-    
     if(fclose(solve_file) == EOF)
         error_handler("fclose");
 
@@ -146,20 +150,20 @@ int main(int argc, char const *argv[]) {
             error_handler("Closing ctpr FD");
         if(close(pipes[i].parent_to_child[1]) == -1)
             error_handler("Closing ptcw FD");
-        printf("%d", pipes[i].pid);
+        kill(pipes[i].pid, SIGKILL);
         if(waitpid(pipes[i].pid, NULL, 0) == -1)
             error_handler("wait");
     }
-    printf("llegue");
-    unlinkData(shared_data);
+   
+    //unlinkData(shared_data);
   
     return 0;
 }
 
 
 void send_task(t_child child_pipes, char * const* tasks, int * current_task_idx) {
-    int task_length = strlen(tasks[*current_task_idx]) + 1;
-    if (write(child_pipes.parent_to_child[1], tasks[*current_task_idx], task_length)== -1) {
+    int task_length = strlen(tasks[*current_task_idx]);
+    if (write(child_pipes.parent_to_child[1], tasks[*current_task_idx], task_length) == -1) {
         error_handler("write");
     }
     (*current_task_idx)++;

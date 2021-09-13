@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
         task_count = atoi(argv[1]);
     }
     else if (argc == 1) {
-        scanf("%10d", &task_count);
+        scanf("%d", &task_count);
     }
 
     sharedData shared_data = openData(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
@@ -34,10 +34,10 @@ int main(int argc, char *argv[]) {
     char *shmBase=getShmBase(shared_data);   
     int i = 0;
     int offset=0;
-    while (i < task_count)
-    {
-      
-        sem_wait(mutexSem);
+    while (i <= task_count) {
+        if(sem_wait(mutexSem) == -1) {
+            error_handler("sem_wait");
+        }
         offset+=printf("%s",shmBase+offset);
         i++;
     }
