@@ -22,8 +22,8 @@
 
 #define MAX_CHILDS 5
 #define MAX_INITIAL_TASKS_PER_CHILD 3
-#define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MAX_INITIAL_TASKS_PER_CHILD)*childs_count) <= pending_tasks ? MAX_INITIAL_TASKS_PER_CHILD : 1)
-#define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_CHILDS > total_tasks ? total_tasks : MAX_CHILDS)
+#define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MAX_INITIAL_TASKS_PER_CHILD)*childs_count) <= (pending_tasks) ? MAX_INITIAL_TASKS_PER_CHILD : 1)
+#define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_CHILDS > (total_tasks) ? (total_tasks) : MAX_CHILDS)
 #define MAX_READ_OUTPUT_SIZE 4096
 #define STDOUT 1
 #define STDIN 0
