@@ -69,7 +69,7 @@ int main(int argc, char const *argv[]) {
     sem_t *mutexSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
-    sleep(5);
+    sleep(2);
     printf("%d", total_tasks);
 
     //initialize childs
@@ -99,6 +99,7 @@ int main(int argc, char const *argv[]) {
         }
 
         for(int i = 0; i < childs_count; i++) {
+            printf("current task index %d\n", current_task_idx);
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
                 int read_return;
                 char read_output[MAX_READ_OUTPUT_SIZE + 1];
@@ -111,11 +112,6 @@ int main(int argc, char const *argv[]) {
 
                     char * answer = strtok(read_output, "\n");
                     while(answer != NULL) {
-
-                        //assign a single new task to the current child
-                        if(current_task_idx < total_tasks){
-                            send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-                        }
 
                         offset+=shm_writer(answer,shmBase+offset);
                         if(sem_post(mutexSem) == -1) {
@@ -132,12 +128,16 @@ int main(int argc, char const *argv[]) {
         
                         solved_tasks++;
                     }
+                        //assign a single new task to the current child
+                        if(current_task_idx < total_tasks){
+                            send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+                        }
                 }
             }
         }
     }
 
-    //unlinkData(shared_data);
+    unlinkData(shared_data);
     fclose(solve_file);
 
     //close remaining fd

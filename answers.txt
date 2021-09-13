@@ -1,2 +1,0 @@
-PID: 8563 Filename: hanoi4.cnf Number of variables: 718 Number of clauses: 4806 CPU time: 0.045350s SATISFIABLE
-PID: 8564 Filename: hanoi5.cnf Number of variables: 1931 Number of clauses: 14103 CPU time: 0.561888s SATISFIABLE

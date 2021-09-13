@@ -9,8 +9,9 @@ struct sharedDataCDT{
 };
 int shm_writer(char *buff, char *shmBase){
     int size=strlen(buff);
+    shmBase[size]='\n';
     memcpy(shmBase, buff,size);
-    return size;
+    return size+1;
 
 }
 sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
@@ -52,7 +53,7 @@ sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
     return shared_data;
 }
 void unlinkData(sharedData data){
-    if(munmap(data->shmBase, data->shmSize+ sizeof(long))<0){
+    if(munmap(data->shmBase, data->shmSize)<0){
         error_handler("munmap");
         return;
     }
@@ -103,7 +104,7 @@ void closeData(sharedData data){
     if(sem_close(data->mutexSem) == -1){
         error_handler("sem_close");
     }
-    if(munmap(data->shmBase, data->shmSize+sizeof(long)) == -1){
+    if(munmap(data->shmBase, data->shmSize) == -1){
         error_handler("munmap");
     }
     if(close(data->shmFd) == -1){
