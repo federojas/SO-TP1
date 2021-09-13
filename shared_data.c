@@ -2,9 +2,9 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #define _XOPEN_SOURCE 500
 
-#include "sharedData.h"
+#include "shared_data.h"
 
-struct sharedDataCDT{
+struct shared_data_CDT{
     sem_t *mutexSem;
     int shmSize, shmFd;
     char *shmPath, *mutexPath, *shmBase;
@@ -16,17 +16,13 @@ int shm_writer(char *buff, char *shmBase){
     return size+1;
 
 }
-sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
-    sharedData shared_data= malloc(sizeof(struct sharedDataCDT));
+shared_data init_shared_data(char *mutexPath, char *shmPath, int shmSize){
+    shared_data shared_data= malloc(sizeof(struct shared_data_CDT));
     shared_data->mutexPath=mutexPath;
     shared_data->shmPath=shmPath;
     shared_data->shmSize=shmSize;
-
-    //------------------------------------NO SE SI HACE FALTA ESTO
     shm_unlink(shared_data->shmPath);
     sem_unlink(shared_data->mutexPath);
-
-    //-------------------------------------
 
     //--------------------------SEM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
     shared_data->mutexSem = sem_open(mutexPath, O_CREAT |  O_EXCL , 0660, 1 );
@@ -35,7 +31,6 @@ sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
     }
 
     //---------------------------SHM OPEN (with creation flag)----------------------------------------------------------------------------------------------------
-    //shm open with creation flags 
     shared_data->shmFd=shm_open(shmPath, O_CREAT | O_RDWR | O_EXCL, S_IWUSR | S_IRUSR );
     if(shared_data->shmFd==-1){
         error_handler("shm_open");
@@ -54,7 +49,7 @@ sharedData initSharedData(char *mutexPath, char *shmPath, int shmSize){
     shared_data->shmBase=shmBase;
     return shared_data;
 }
-void unlinkData(sharedData data){
+void unlink_data(shared_data data){
     if(munmap(data->shmBase, data->shmSize)<0){
         error_handler("munmap");
         return;
@@ -68,12 +63,11 @@ void unlinkData(sharedData data){
         return;
     }
     free(data);
-    
 }
-sharedData openData(char *mutexPath, char *shmPath, int shmSize){
+shared_data open_data(char *mutexPath, char *shmPath, int shmSize){
 
-    //basically we do a similar process that in the init but without creation flags
-    sharedData shared_data= malloc(sizeof(struct sharedDataCDT));
+    //similar process init but without creation flags
+    shared_data shared_data = malloc(sizeof(struct shared_data_CDT));
     shared_data->mutexPath=mutexPath;
     shared_data->shmPath=shmPath;
     shared_data->shmSize=shmSize;
@@ -99,7 +93,7 @@ sharedData openData(char *mutexPath, char *shmPath, int shmSize){
     return shared_data ;
 
 }
-void closeData(sharedData data){
+void close_data(shared_data data){
     if(sem_close(data->mutexSem) == -1){
         error_handler("sem_close");
     }
@@ -111,9 +105,9 @@ void closeData(sharedData data){
     }
     free(data);  
 }
-sem_t *getMutexSem(sharedData data){
+sem_t *getMutexSem(shared_data data){
     return data->mutexSem;
 }
-char *getShmBase(sharedData data){
+char *getShmBase(shared_data data){
     return data->shmBase;
 }

@@ -3,4 +3,4 @@
 
 void error_handler(char * description);
 
-#endif // ERROR_HANDLING
+#endif

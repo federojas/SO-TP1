@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "error_handling.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "includes.h": "c",
+        "shared_data.h": "c"
     }
 }

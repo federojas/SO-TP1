@@ -2,17 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #define _POSIX_C_SOURCE 200809L
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include "error_handling.h"
-
-
-
-#define MAX_READ_OUTPUT_SIZE 4096
-#define STDIN 0
-#define STDOUT 1
+#include "includes.h"
 
 void solve(char *line);
 
@@ -23,17 +13,6 @@ int main(int argc, char const *argv[])
     if(check != 0) {
         perror("setvbuf failed");
     }
-
-    //receive tasks
-    // char read_output[MAX_READ_OUTPUT_SIZE + 1];
-    // int read_return = 0;
-
-    // while ((read_return = read(STDIN, read_output, MAX_READ_OUTPUT_SIZE)) != 0) {
-    //     if (read_return == -1)
-    //         error_handler("read");
-    //     read_output[read_return] = 0;
-    //     solve(read_output);
-    // }
 
     char *file = NULL;
     size_t len = 0;

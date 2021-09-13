@@ -1,7 +1,7 @@
 CC=gcc
 GCCFLAGS = -g -Wall -std=c99 
 GCCLIBS = -lrt -lpthread
-FILES =  error_handling.c sharedData.c 
+FILES =  error_handling.c shared_data.c 
 MAIN_FILES = app view slave
 
 

@@ -2,32 +2,13 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #define _XOPEN_SOURCE 500
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include "error_handling.h"
-#include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>        /* For mode constants */
-#include <fcntl.h>
-#include <string.h>
-#include "sharedData.h"
-#include <semaphore.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
-
+#include "includes.h"
+#include "shared_data.h"
 
 #define MAX_CHILDS 5
 #define MAX_INITIAL_TASKS_PER_CHILD 3
 #define INITIAL_TASKS_PER_CHILD(childs_count, pending_tasks) (((MAX_INITIAL_TASKS_PER_CHILD)*childs_count) <= pending_tasks ? MAX_INITIAL_TASKS_PER_CHILD : 1)
 #define CALCULATE_CHILDS_COUNT(total_tasks) (MAX_CHILDS > total_tasks ? total_tasks : MAX_CHILDS)
-#define MAX_READ_OUTPUT_SIZE 4096
-#define STDOUT 1
-#define STDIN 0
-
 
 typedef struct {
     int child_to_parent[2];
@@ -63,13 +44,14 @@ int main(int argc, char const *argv[]) {
     int solved_tasks = 0;
     char const **tasks = argv + 1;
 
-    FILE * solve_file = fopen(answers_file_name, "w");
+    FILE * solve_file;
+    solve_file = fopen(answers_file_name, "w");
     if (solve_file == NULL) {
         error_handler("fopen");
     }
 
     //initialize all shared memory that will be used
-    sharedData shared_data=initSharedData(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
+    shared_data shared_data=init_shared_data(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
     sem_t *mutexSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
@@ -157,7 +139,7 @@ int main(int argc, char const *argv[]) {
             error_handler("wait");
     }
    
-    closeData(shared_data);
+    close_data(shared_data);
   
     return 0;
 }

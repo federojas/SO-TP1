@@ -2,19 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #define _XOPEN_SOURCE 500
 
-#include <sys/shm.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <semaphore.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include "sharedData.h"
-#include <stdio.h>
-
-#define MAX_READ_OUTPUT_SIZE 4096
+#include "includes.h"
 
 int main(int argc, char *argv[]) {
     int task_count = 0;
@@ -30,7 +18,7 @@ int main(int argc, char *argv[]) {
         scanf("%d", &task_count);
     }
 
-    sharedData shared_data = openData(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
+    shared_data shared_data = open_data(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
     sem_t *mutexSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);   
@@ -44,7 +32,7 @@ int main(int argc, char *argv[]) {
         i++;
     }
     
-    unlinkData(shared_data);
+    unlink_data(shared_data);
     return 0;
 }
     
