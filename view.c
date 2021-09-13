@@ -3,6 +3,7 @@
 #define _XOPEN_SOURCE 500
 
 #include "includes.h"
+#include "shared_data.h"
 
 int main(int argc, char *argv[]) {
     int task_count = 0;
@@ -18,7 +19,7 @@ int main(int argc, char *argv[]) {
         scanf("%d", &task_count);
     }
 
-    shared_data shared_data = open_data(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
+    shared_data_ADT shared_data = open_data(SEM_MUTEX,SHM_PATH, task_count * MAX_READ_OUTPUT_SIZE);
 
     sem_t *mutexSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);   

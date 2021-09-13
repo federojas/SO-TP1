@@ -7,13 +7,13 @@
 #define SEM_MUTEX "/sem_mutex"
 #define SEM_FULL "/sem_full"
 
-typedef struct shared_data_CDT * shared_data;
-shared_data init_shared_data(char *mutexPath, char *shmPath, int shmSize);
-shared_data open_data(char *mutexPath, char *shmPath, int shmSize);
-void close_data(shared_data data);
-void unlink_data(shared_data data);
+typedef struct shared_data_CDT * shared_data_ADT;
+shared_data_ADT init_shared_data(char *mutexPath, char *shmPath, int shmSize);
+shared_data_ADT open_data(char *mutexPath, char *shmPath, int shmSize);
+void close_data(shared_data_ADT data);
+void unlink_data(shared_data_ADT data);
 int shm_writer(char *buff, char *shmBase);
-sem_t *getMutexSem(shared_data data);
-char *getShmBase(shared_data data);
+sem_t *getMutexSem(shared_data_ADT data);
+char *getShmBase(shared_data_ADT data);
 
 #endif 

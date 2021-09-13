@@ -51,7 +51,7 @@ int main(int argc, char const *argv[]) {
     }
 
     //initialize all shared memory that will be used
-    shared_data shared_data=init_shared_data(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
+    shared_data_ADT shared_data=init_shared_data(SEM_MUTEX, SHM_PATH, total_tasks * MAX_READ_OUTPUT_SIZE);
     sem_t *mutexSem=getMutexSem(shared_data);
     char *shmBase=getShmBase(shared_data);
     
