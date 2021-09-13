@@ -1,0 +1,9 @@
+pvs-studio.com/en/docs/warnings/	1	err	Help: The documentation for all analyzer warnings is available here: https://pvs-studio.com/en/docs/warnings/.
+/home/ldagostino/so/tp1/SO-TP1/app.c	126	note	V575 The potential null pointer is passed into 'fprintf' function. Inspect the first argument.
+/home/ldagostino/so/tp1/SO-TP1/app.c	145	warn	V1004 The 'solve_file' pointer was used unsafely after it was verified against nullptr. Check lines: 67, 145.
+/home/ldagostino/so/tp1/SO-TP1/app.c	24	note	V1003 The macro 'INITIAL_TASKS_PER_CHILD' is a dangerous expression. The parameter 'pending_tasks' must be surrounded by parentheses.
+/home/ldagostino/so/tp1/SO-TP1/app.c	25	note	V1003 The macro 'CALCULATE_CHILDS_COUNT' is a dangerous expression. The parameter 'total_tasks' must be surrounded by parentheses.
+/home/ldagostino/so/tp1/SO-TP1/sharedData.c	21	warn	V522 There might be dereferencing of a potential null pointer 'shared_data'. Check lines: 21, 20.
+/home/ldagostino/so/tp1/SO-TP1/sharedData.c	77	warn	V522 There might be dereferencing of a potential null pointer 'shared_data'. Check lines: 77, 76.
+/home/ldagostino/so/tp1/SO-TP1/slave.c	34	warn	V557 Array underrun is possible. The value of 'read_return' index could reach -1.
+/home/ldagostino/so/tp1/SO-TP1/slave.c	56	warn	V1004 The 'result_stream' pointer was used unsafely after it was verified against nullptr. Check lines: 52, 56.
