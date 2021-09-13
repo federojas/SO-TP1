@@ -7,13 +7,14 @@
 #include <sys/time.h>
 #include "error_handling.h"
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
 #include <fcntl.h>
 #include <string.h>
 #include "sharedData.h"
 #include <semaphore.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 
 
@@ -61,7 +62,6 @@ int main(int argc, char const *argv[]) {
     char const **tasks = argv + 1;
 
     FILE * solve_file = fopen(answers_file_name, "w");
-    //printf("%d\n",fileno(solve_file));
     if (solve_file == NULL) {
         error_handler("fopen");
     }
@@ -101,7 +101,6 @@ int main(int argc, char const *argv[]) {
         }
 
         for(int i = 0; i < childs_count; i++) {
-            printf("current task index %d\n", current_task_idx);
             if(FD_ISSET(pipes[i].child_to_parent[0], &read_set)) {
                 int read_return;
                 char read_output[MAX_READ_OUTPUT_SIZE + 1];
@@ -122,8 +121,7 @@ int main(int argc, char const *argv[]) {
 
 
                         if(fprintf(solve_file, "%s\n", answer)<0){
-                            printf("fallo esto capo");
-                            exit(1);
+                            error_handler("fprintf");
                         }
 
                         answer = strtok(NULL, "\n");
@@ -138,9 +136,9 @@ int main(int argc, char const *argv[]) {
             }
         }
     }
-
-    unlinkData(shared_data);
-    fclose(solve_file);
+    
+    if(fclose(solve_file) == EOF)
+        error_handler("fclose");
 
     //close remaining fd
     for(int i = 0; i < childs_count; i++) {
@@ -148,7 +146,13 @@ int main(int argc, char const *argv[]) {
             error_handler("Closing ctpr FD");
         if(close(pipes[i].parent_to_child[1]) == -1)
             error_handler("Closing ptcw FD");
+        printf("%d", pipes[i].pid);
+        if(waitpid(pipes[i].pid, NULL, 0) == -1)
+            error_handler("wait");
     }
+    printf("llegue");
+    unlinkData(shared_data);
+  
     return 0;
 }
 

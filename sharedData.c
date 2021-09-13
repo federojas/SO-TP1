@@ -80,10 +80,7 @@ sharedData openData(char *mutexPath, char *shmPath, int shmSize){
     if(shared_data->mutexSem == SEM_FAILED){
         error_handler("sem_open");
     }
-    // shared_data->fullSem = sem_open(fullPath, 0, 0660, 0);
-    // if(shared_data->fullSem == SEM_FAILED){
-    //     error_handler("sem_open");
-    // }
+
     //shm open with creation flags 
     shared_data->shmFd=shm_open(shared_data->shmPath,  O_RDONLY  , 00400);//not necessary to specify permits
 
