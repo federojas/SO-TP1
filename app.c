@@ -24,13 +24,12 @@ void initialize_shared_memory(shared_data_ADT * shared_data, sem_t ** mutex_sem,
 void send_initial_tasks(t_child * pipes, char * const* tasks, int childs_count, int initial_tasks_per_child, int * current_task_idx);
 void free_childs(t_child * pipes, int childs_count);
 
-const char* slave_file_name = "./slave"; //insert slave file name
-const char* answers_file_name = "answers.txt"; //insert answers file name
+const char* slave_file_name = "./slave"; 
+const char* answers_file_name = "answers.txt"; 
 
 
 int main(int argc, char const *argv[]) {
-    //comentario de prueba
-    
+
     if(argc < 2) {
         fprintf(stderr, "Usage: %s <files>\n", argv[0]);
         exit(EXIT_FAILURE);
@@ -71,7 +70,7 @@ int main(int argc, char const *argv[]) {
     int initial_tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
     send_initial_tasks(pipes, (char * const*)tasks, childs_count, initial_tasks_per_child, &current_task_idx);
 
-    int offset=0;
+    int offset = 0;
     while(solved_tasks < total_tasks) {
         fd_set read_set;
         build_read_set(pipes, &read_set, childs_count);
@@ -84,10 +83,10 @@ int main(int argc, char const *argv[]) {
                 int read_return;
                 char read_output[MAX_READ_OUTPUT_SIZE + 1];
                 read_return = read(pipes[i].child_to_parent[0], read_output, MAX_READ_OUTPUT_SIZE);
+                
                 if(read_return == -1) {
                     error_handler("read");
                 } else if(read_return != 0) {
-
                     read_output[read_return] = 0;
 
                     char * answer = strtok(read_output, "\n");
@@ -98,7 +97,6 @@ int main(int argc, char const *argv[]) {
                             error_handler("sem_post");
                         }
 
-
                         if(fprintf(solve_file, "%s\n", answer)<0){
                             error_handler("fprintf");
                         }
@@ -107,20 +105,23 @@ int main(int argc, char const *argv[]) {
         
                         solved_tasks++;
                     }
-                        //assign a single new task to the current child
-                        if(current_task_idx < total_tasks){
-                            send_task(pipes[i],(char * const*)tasks, &current_task_idx);
-                            if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
-                                error_handler("write");
-                        }
+                    
+                    //assign a single new task to the current child
+                    if(current_task_idx < total_tasks){
+                        send_task(pipes[i],(char * const*)tasks, &current_task_idx);
+                        if (write(pipes[i].parent_to_child[1], "\n", 1) == -1)
+                            error_handler("write");
+                    }
                 }
             }
         }
     }
-    if(fclose(solve_file) == EOF)
-        error_handler("fclose");
+
+    if(fclose(solve_file) == EOF) error_handler("fclose");
+
     free_childs(pipes, childs_count);
     close_data(shared_data);
+
     return 0;
 }
 
@@ -136,21 +137,17 @@ void send_task(t_child child_pipes, char * const* tasks, int * current_task_idx)
 void build_read_set(t_child pipes[], fd_set * read_set, int childs_count) {
     FD_ZERO(read_set); //set reinitialized
     for (int i = 0; i < childs_count; i++) {
-            FD_SET(pipes[i].child_to_parent[0], read_set);
+        FD_SET(pipes[i].child_to_parent[0], read_set);
     }
 }
 
 void initialize_pipes(t_child * pipes, int childs_count, int * highest_ctp_read_fd) { 
     for (int i = 0; i < childs_count; i++) {
-            if (pipe(pipes[i].child_to_parent) == -1) {
-                error_handler("Pipe ctp");
-            }
-            if(pipe(pipes[i].parent_to_child) == -1) {
-                error_handler("Pipe ptc");
-            }
-            if(pipes[i].child_to_parent[0] > *highest_ctp_read_fd) {
-                *highest_ctp_read_fd = pipes[i].child_to_parent[0];
-            }
+        if (pipe(pipes[i].child_to_parent) == -1) error_handler("Pipe ctp");
+        if(pipe(pipes[i].parent_to_child) == -1) error_handler("Pipe ptc");
+
+        if(pipes[i].child_to_parent[0] > *highest_ctp_read_fd) 
+            *highest_ctp_read_fd = pipes[i].child_to_parent[0];
     }
 
     return;

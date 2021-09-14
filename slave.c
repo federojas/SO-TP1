@@ -39,9 +39,9 @@ void solve(char *file) {
         error_handler("popen");
     }
     
-   if(fgets(minisat_output, MAX_READ_OUTPUT_SIZE, result_stream) == NULL) {
-       error_handler("fgets");
-   }
+    if(fgets(minisat_output, MAX_READ_OUTPUT_SIZE, result_stream) == NULL) {
+        error_handler("fgets");
+    }
 
     if (ferror(result_stream)){
         error_handler("sprintf");

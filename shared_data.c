@@ -9,13 +9,14 @@ struct shared_data_CDT{
     int shmSize, shmFd;
     char *shm_path, *mutex_path, *shm_ptr;
 };
+
 int shm_writer(char *buff, char *shm_ptr){
     int size=strlen(buff);
     shm_ptr[size]='\n';
     memcpy(shm_ptr, buff,size);
     return size+1;
-
 }
+
 shared_data_ADT init_shared_data(char *mutex_path, char *shm_path, int shmSize){
     shared_data_ADT shared_data= malloc(sizeof(struct shared_data_CDT));
     shared_data->mutex_path=mutex_path;
@@ -49,6 +50,7 @@ shared_data_ADT init_shared_data(char *mutex_path, char *shm_path, int shmSize){
     shared_data->shm_ptr=shm_ptr;
     return shared_data;
 }
+
 void unlink_data(shared_data_ADT data){
     if(munmap(data->shm_ptr, data->shmSize)<0){
         error_handler("munmap");
@@ -64,8 +66,8 @@ void unlink_data(shared_data_ADT data){
     }
     free(data);
 }
-shared_data_ADT open_data(char *mutex_path, char *shm_path, int shmSize){
 
+shared_data_ADT open_data(char *mutex_path, char *shm_path, int shmSize){
     //similar process init but without creation flags
     shared_data_ADT shared_data = malloc(sizeof(struct shared_data_CDT));
     shared_data->mutex_path=mutex_path;
@@ -91,8 +93,8 @@ shared_data_ADT open_data(char *mutex_path, char *shm_path, int shmSize){
     } 
     shared_data->shm_ptr=shm_ptr;
     return shared_data ;
-
 }
+
 void close_data(shared_data_ADT data){
     if(sem_close(data->mutexSem) == -1){
         error_handler("sem_close");
@@ -105,9 +107,11 @@ void close_data(shared_data_ADT data){
     }
     free(data);  
 }
+
 sem_t *get_mutex_sem(shared_data_ADT data){
     return data->mutexSem;
 }
+
 char *get_shm_ptr(shared_data_ADT data){
     return data->shm_ptr;
 }
