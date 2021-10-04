@@ -15,20 +15,22 @@ int main(int argc, char *argv[]){
         scanf("%d", &task_count);
     }
 
-    if(mkfifo(NAMED_PIPE, 0666) == -1) {
-        error_handler("named pipe");
-    }
+    
 
-    int named_pipe_fd = open(NAMED_PIPE, 0666);
+    int named_pipe_fd = open(NAMED_PIPE, 0755);
+    if(named_pipe_fd == -1)
+        error_handler("open");
     char output[MAX_READ_OUTPUT_SIZE];
     int i = 0;
     while(i < 7) {
-        read(named_pipe_fd, output, MAX_READ_OUTPUT_SIZE);
+        if(read(named_pipe_fd, output, MAX_READ_OUTPUT_SIZE) == -1)
+            error_handler("read");
         printf("%s", output);
         i++;
     }
-    close(named_pipe_fd);
-    unlink(NAMED_PIPE);
+    if(close(named_pipe_fd) == -1)
+        error_handler("close");
+    
 }
 
 // 0000 is ---------

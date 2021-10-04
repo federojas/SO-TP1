@@ -1,7 +1,0 @@
-PID: 1356 Filename: 1.cnf Number of variables: 435 Number of clauses: 925 CPU time: 0.006677s UNSATISFIABLE
-PID: 1358 Filename: 3.cnf Number of variables: 986 Number of clauses: 2285 CPU time: 0.012122s UNSATISFIABLE
-PID: 1357 Filename: 2.cnf Number of variables: 1359 Number of clauses: 3238 CPU time: 0.014192s UNSATISFIABLE
-PID: 1360 Filename: 5.cnf Number of variables: 1501 Number of clauses: 3473 CPU time: 0.015586s SATISFIABLE
-PID: 1356 Filename: 6.cnf Number of variables: 1363 Number of clauses: 2778 CPU time: 0.008532s SATISFIABLE
-PID: 1359 Filename: 4.cnf Number of variables: 10410 Number of clauses: 20572 CPU time: 0.025347s UNSATISFIABLE
-PID: 1358 Filename: 7.cnf Number of variables: 1363 Number of clauses: 2904 CPU time: 0.010000s SATISFIABLE

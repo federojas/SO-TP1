@@ -65,9 +65,13 @@ void solve(char *file) {
     printf("PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
     
     int named_pipe_fd = open(NAMED_PIPE, 0666);
+    if(named_pipe_fd == -1)
+        error_handler("open");
 
     char named_pipe_output[MAX_READ_OUTPUT_SIZE];
     sprintf(named_pipe_output, "PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
-    write(named_pipe_fd, named_pipe_output , MAX_READ_OUTPUT_SIZE);
-    close(named_pipe_fd);
+    if(write(named_pipe_fd, named_pipe_output , MAX_READ_OUTPUT_SIZE) == -1)
+        error_handler("write");
+    if(close(named_pipe_fd) == -1)
+        error_handler("close");
 }

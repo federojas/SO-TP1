@@ -65,7 +65,13 @@ int main(int argc, char const *argv[]) {
 
     int highest_ctp_read_fd = -1;
     initialize_pipes(pipes, childs_count, &highest_ctp_read_fd);
+
+    if(mkfifo(NAMED_PIPE, 0666) == -1) {
+        error_handler("named pipe");
+    }
+
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
+
     
     int initial_tasks_per_child = INITIAL_TASKS_PER_CHILD(childs_count, total_tasks);
     send_initial_tasks(pipes, (char * const*)tasks, childs_count, initial_tasks_per_child, &current_task_idx);
@@ -121,8 +127,8 @@ int main(int argc, char const *argv[]) {
 
     free_childs(pipes, childs_count);
     close_data(shared_data);
-    
-
+    if(unlink(NAMED_PIPE) == -1)
+        error_handler("unlink");
     return 0;
 }
 
