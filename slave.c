@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "includes.h"
+#include "shared_data.h"
 
 void solve(char *line);
 
@@ -63,4 +64,10 @@ void solve(char *file) {
     //nos comunicados por FD 1 con el master
     printf("PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
     
+    int named_pipe_fd = open(NAMED_PIPE, 0777);
+
+    char named_pipe_output[MAX_READ_OUTPUT_SIZE];
+    sprintf(named_pipe_output, "PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
+    write(named_pipe_fd, named_pipe_output , MAX_READ_OUTPUT_SIZE);
+    close(named_pipe_fd);
 }

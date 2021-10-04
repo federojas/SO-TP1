@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
                 if(read_return == -1) {
                     error_handler("read");
                 } else if(read_return != 0) {
-                    read_output[read_return] = 0;
+                    read_output[read_return] = 0; 
 
                     char * answer = strtok(read_output, "\n");
                     while(answer != NULL) {
@@ -121,6 +121,7 @@ int main(int argc, char const *argv[]) {
 
     free_childs(pipes, childs_count);
     close_data(shared_data);
+    
 
     return 0;
 }
@@ -221,3 +222,4 @@ void free_childs(t_child * pipes, int childs_count) {
             error_handler("wait");
     }  
 }
+

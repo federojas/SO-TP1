@@ -6,6 +6,7 @@
 #define SHM_PATH "/shm_buff"
 #define SEM_MUTEX "/sem_mutex"
 #define SEM_FULL "/sem_full"
+#define NAMED_PIPE "/named_pipesss"
 
 typedef struct shared_data_CDT * shared_data_ADT;
 shared_data_ADT init_shared_data(char *mutex_path, char *shm_path, int shmSize);
