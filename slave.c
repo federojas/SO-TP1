@@ -64,7 +64,7 @@ void solve(char *file) {
     //nos comunicados por FD 1 con el master
     printf("PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);
     
-    int named_pipe_fd = open(NAMED_PIPE, 0777);
+    int named_pipe_fd = open(NAMED_PIPE, 0666);
 
     char named_pipe_output[MAX_READ_OUTPUT_SIZE];
     sprintf(named_pipe_output, "PID: %d Filename: %s Number of variables: %d Number of clauses: %d CPU time: %fs %s", getpid(), file, number_of_variables, number_of_clauses, cpu_time, satisfiability);

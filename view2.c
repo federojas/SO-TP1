@@ -15,11 +15,11 @@ int main(int argc, char *argv[]){
         scanf("%d", &task_count);
     }
 
-    if(mkfifo(NAMED_PIPE, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) == -1) {
+    if(mkfifo(NAMED_PIPE, 0666) == -1) {
         error_handler("named pipe");
     }
 
-    int named_pipe_fd = open(NAMED_PIPE, 0777);
+    int named_pipe_fd = open(NAMED_PIPE, 0666);
     char output[MAX_READ_OUTPUT_SIZE];
     int i = 0;
     while(i < 7) {
