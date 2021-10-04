@@ -35,6 +35,10 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    if(mkfifo(NAMED_PIPE, 0666) == -1) {
+        error_handler("named pipe");
+    }
+
     int check = setvbuf(stdout, NULL, _IONBF, 0);
     if (check != 0) {
         error_handler("setvbuff");
@@ -66,9 +70,7 @@ int main(int argc, char const *argv[]) {
     int highest_ctp_read_fd = -1;
     initialize_pipes(pipes, childs_count, &highest_ctp_read_fd);
 
-    if(mkfifo(NAMED_PIPE, 0666) == -1) {
-        error_handler("named pipe");
-    }
+    
 
     initialize_forks(pipes, childs_count, total_tasks, (char * const*)tasks, &current_task_idx);
 
@@ -124,7 +126,6 @@ int main(int argc, char const *argv[]) {
     }
 
     if(fclose(solve_file) == EOF) error_handler("fclose");
-
     free_childs(pipes, childs_count);
     close_data(shared_data);
     if(unlink(NAMED_PIPE) == -1)
